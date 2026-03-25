@@ -24,29 +24,53 @@ public class Enemy extends Entity {
         this.dirX = dirX;
         this.dirY = dirY;
         this.color = color;
+        
+        this.maxHealth = 10;
+        this.health = 10;
+        this.minDamage = 1;
+        this.maxDamage = 3;
     }
     
     public void takeTurn() {
-        if (!isMoving) {
-            targetX = x + (dirX * gamePanel.tileSize);
-            targetY = y + (dirY * gamePanel.tileSize);
+        if (!isMoving && !isDead) {
+            int newTargetX = x + (dirX * gamePanel.tileSize);
+            int newTargetY = y + (dirY * gamePanel.tileSize);
             
             // Simple bounds checking to reverse direction
-            if (targetX < 0 || targetX + gamePanel.tileSize > gamePanel.screenWidth) {
+            if (newTargetX < 0 || newTargetX + gamePanel.tileSize > gamePanel.screenWidth) {
                 dirX *= -1;
-                targetX = x + (dirX * gamePanel.tileSize);
+                newTargetX = x + (dirX * gamePanel.tileSize);
             }
-            if (targetY < 0 || targetY + gamePanel.tileSize > gamePanel.screenHeight) {
+            if (newTargetY < 0 || newTargetY + gamePanel.tileSize > gamePanel.screenHeight) {
                 dirY *= -1;
-                targetY = y + (dirY * gamePanel.tileSize);
+                newTargetY = y + (dirY * gamePanel.tileSize);
             }
             
-            isMoving = true;
+            // Check for collision at target location
+            Entity targetEntity = gamePanel.getEntityAt(newTargetX, newTargetY);
+            
+            if (targetEntity != null) {
+                if (targetEntity instanceof Player) {
+                    this.attack(targetEntity);
+                } else if (targetEntity instanceof Enemy) {
+                    // Turn around if we bump into another enemy
+                    dirX *= -1;
+                    dirY *= -1;
+                }
+                
+                // Do not move into occupied tile
+                targetX = x;
+                targetY = y;
+            } else {
+                targetX = newTargetX;
+                targetY = newTargetY;
+                isMoving = true;
+            }
         }
     }
     
     public void update() {
-        if (isMoving) {
+        if (isMoving && !isDead) {
             if (x < targetX) x += speed;
             if (x > targetX) x -= speed;
             if (y < targetY) y += speed;
@@ -62,7 +86,16 @@ public class Enemy extends Entity {
     }
     
     public void draw(Graphics2D g2) {
-        g2.setColor(color);
-        g2.fillRect(x, y, gamePanel.tileSize, gamePanel.tileSize);
+        if (!isDead) {
+            g2.setColor(color);
+            g2.fillRect(x, y, gamePanel.tileSize, gamePanel.tileSize);
+            
+            // Draw health bar
+            g2.setColor(Color.RED);
+            g2.fillRect(x, y - 5, gamePanel.tileSize, 4);
+            g2.setColor(Color.GREEN);
+            int hpWidth = (int) (((double) health / maxHealth) * gamePanel.tileSize);
+            g2.fillRect(x, y - 5, hpWidth, 4);
+        }
     }
 }

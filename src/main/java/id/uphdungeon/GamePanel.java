@@ -1,11 +1,13 @@
 package id.uphdungeon;
 
+import id.uphdungeon.entity.Entity;
 import id.uphdungeon.entity.Player;
 import id.uphdungeon.entity.Enemy;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.util.ArrayList;
 import javax.swing.JPanel;
 
 public class GamePanel extends JPanel implements Runnable {
@@ -22,11 +24,9 @@ public class GamePanel extends JPanel implements Runnable {
 
   public KeyHandler keyHandler = new KeyHandler();
   private Thread gameThread;
-  
+
   public Player player = new Player(this, keyHandler);
-  public Enemy enemy1;
-  public Enemy enemy2;
-  public Enemy enemy3;
+  public ArrayList<Enemy> enemies = new ArrayList<>();
 
   public GamePanel() {
     this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -35,9 +35,22 @@ public class GamePanel extends JPanel implements Runnable {
     this.setFocusable(true); // Allows the panel to receive key inputs
     this.addKeyListener(keyHandler);
 
-    enemy1 = new Enemy(this, tileSize * 5, tileSize * 5, 1, 0, Color.RED);
-    enemy2 = new Enemy(this, tileSize * 8, tileSize * 2, 0, 1, Color.BLUE);
-    enemy3 = new Enemy(this, tileSize * 10, tileSize * 10, -1, -1, Color.GREEN);
+    enemies.add(new Enemy(this, tileSize * 5, tileSize * 5, 1, 0, Color.RED));
+    enemies.add(new Enemy(this, tileSize * 8, tileSize * 2, 0, 1, Color.BLUE));
+    enemies.add(new Enemy(this, tileSize * 10, tileSize * 10, -1, -1, Color.GREEN));
+  }
+
+  public Entity getEntityAt(int x, int y) {
+      if (!player.isDead && player.x == x && player.y == y) {
+          return player;
+      }
+
+      for (Enemy e : enemies) {
+          if (!e.isDead && e.x == x && e.y == y) {
+              return e;
+          }
+      }
+      return null;
   }
 
   public void startGameThread() {
@@ -72,19 +85,24 @@ public class GamePanel extends JPanel implements Runnable {
   }
 
   public void update() {
-    player.update();
-    enemy1.update();
-    enemy2.update();
-    enemy3.update();
+    if (!player.isDead) {
+        player.update();
+    }
+
+    enemies.removeIf(e -> e.isDead);
+
+    for (Enemy e : enemies) {
+        e.update();
+    }
   }
 
   public void advanceTurn() {
+    if (player.isDead) return;
+
     // This is called each time the player makes an action/move.
-    // In a roguelike, this is where initiatives are rolled or enemies take their turns.
-    System.out.println("Turn advanced! Entities take their action based on initiative.");
-    enemy1.takeTurn();
-    enemy2.takeTurn();
-    enemy3.takeTurn();
+    for (Enemy e : enemies) {
+        e.takeTurn();
+    }
   }
 
   @Override
@@ -101,10 +119,18 @@ public class GamePanel extends JPanel implements Runnable {
         g2.drawLine(0, i * tileSize, screenWidth, i * tileSize);
     }
 
-    player.draw(g2);
-    enemy1.draw(g2);
-    enemy2.draw(g2);
-    enemy3.draw(g2);
+    if (!player.isDead) {
+        player.draw(g2);
+    }
+
+    for (Enemy e : enemies) {
+        e.draw(g2);
+    }
+
+    if (player.isDead) {
+        g2.setColor(Color.RED);
+        g2.drawString("GAME OVER", screenWidth/2 - 40, screenHeight/2);
+    }
 
     g2.dispose(); // Housekeeping to save memory
   }

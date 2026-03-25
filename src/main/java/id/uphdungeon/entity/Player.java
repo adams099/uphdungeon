@@ -21,6 +21,11 @@ public class Player extends Entity {
         this.y = gamePanel.tileSize * 2;
         this.speed = 4;
         
+        this.maxHealth = 20;
+        this.health = 20;
+        this.minDamage = 2;
+        this.maxDamage = 5;
+        
         this.targetX = this.x;
         this.targetY = this.y;
     }
@@ -51,9 +56,27 @@ public class Player extends Entity {
 
                 // Only move if we actually changed position
                 if (targetX != x || targetY != y) {
-                    isMoving = true;
-                    // Once player commits to an action, advance the game turn
-                    gamePanel.advanceTurn();
+                    Entity targetEntity = gamePanel.getEntityAt(targetX, targetY);
+                    
+                    if (targetEntity != null) {
+                        // There is an entity here, so we attack instead of moving
+                        if (targetEntity instanceof Enemy) {
+                            this.attack(targetEntity);
+                        }
+                        
+                        // Prevent moving into occupied tile
+                        targetX = x;
+                        targetY = y;
+                        
+                        // Attacking takes a turn
+                        gamePanel.advanceTurn();
+                    } else {
+                        // Empty tile, move
+                        isMoving = true;
+                        
+                        // Once player commits to an action, advance the game turn
+                        gamePanel.advanceTurn();
+                    }
                 }
                 
                 keyH.consumeMove();
@@ -79,5 +102,12 @@ public class Player extends Entity {
     public void draw(Graphics2D g2) {
         g2.setColor(Color.WHITE);
         g2.fillRect(x, y, gamePanel.tileSize, gamePanel.tileSize);
+        
+        // Draw health bar above player
+        g2.setColor(Color.RED);
+        g2.fillRect(x, y - 5, gamePanel.tileSize, 4);
+        g2.setColor(Color.GREEN);
+        int hpWidth = (int) (((double) health / maxHealth) * gamePanel.tileSize);
+        g2.fillRect(x, y - 5, hpWidth, 4);
     }
 }
