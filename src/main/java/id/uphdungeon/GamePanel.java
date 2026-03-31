@@ -8,6 +8,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
+import java.util.Comparator;
 import javax.swing.JPanel;
 
 public class GamePanel extends JPanel implements Runnable {
@@ -24,8 +25,21 @@ public class GamePanel extends JPanel implements Runnable {
   public KeyHandler keyHandler = new KeyHandler();
   private Thread gameThread;
 
-  public Player player = new Player(this, keyHandler);
-  public ArrayList<Enemy> enemies = new ArrayList<>();
+  private Player player;
+  public ArrayList<Entity> entities = new ArrayList<>();
+  private ArrayList<Entity> turnOrder = new ArrayList<>();
+  private int turnIndex = 0;
+  private boolean actionInProgress = false;
+
+  private enum GameState {
+    START_ROUND,
+    PLAYER_TURN,
+    ENEMY_TURN,
+    GAME_OVER,
+    END_ROUND
+  }
+
+  private GameState gameState = GameState.START_ROUND;
 
   public GamePanel() {
     this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -36,22 +50,24 @@ public class GamePanel extends JPanel implements Runnable {
     this.setFocusable(true);
     this.addKeyListener(keyHandler);
 
-    enemies.add(new Enemy(this, tileSize * 5, tileSize * 5, 1, 0, Color.RED));
-    enemies.add(new Enemy(this, tileSize * 8, tileSize * 2, 0, 1, Color.BLUE));
-    enemies.add(new Enemy(this, tileSize * 10, tileSize * 10, -1, -1, Color.GREEN));
+    player = new Player(this, keyHandler);
+    entities.add(player);
+    entities.add(new Enemy(this, tileSize * 5, tileSize * 5, 1, 0, Color.RED));
+    entities.add(new Enemy(this, tileSize * 8, tileSize * 2, 0, 1, Color.BLUE));
+    entities.add(new Enemy(this, tileSize * 10, tileSize * 10, -1, -1, Color.GREEN));
+  }
+
+  public Player getPlayer() {
+    return player;
   }
 
   public Entity getEntityAt(int x, int y) {
-      if (!player.isDead && player.x == x && player.y == y) {
-          return player;
+    for (Entity e : entities) {
+      if (!e.isDead && e.x == x && e.y == y) {
+        return e;
       }
-
-      for (Enemy e : enemies) {
-          if (!e.isDead && e.x == x && e.y == y) {
-              return e;
-          }
-      }
-      return null;
+    }
+    return null;
   }
 
   public void startGameThread() {
@@ -66,7 +82,6 @@ public class GamePanel extends JPanel implements Runnable {
 
     while (gameThread != null) {
       update();
-
       repaint();
 
       try {
@@ -85,22 +100,93 @@ public class GamePanel extends JPanel implements Runnable {
   }
 
   public void update() {
-    if (!player.isDead) {
-        player.update();
-    }
+    if (actionInProgress) {
+      // an animation is playing, just update all entities for animation
+      for (Entity e : entities) e.update();
 
-    enemies.removeIf(e -> e.isDead);
-
-    for (Enemy e : enemies) {
-        e.update();
+      // check if all animations are done
+      boolean allDone = true;
+      for (Entity e : entities) {
+        if (e instanceof Player && ((Player) e).isMoving) {
+          allDone = false;
+          break;
+        }
+        if (e instanceof Enemy && ((Enemy) e).isMoving) {
+          allDone = false;
+          break;
+        }
+      }
+      if (allDone) {
+        actionInProgress = false;
+        // The action is done, now we can proceed with the turn logic.
+        turnIndex++;
+        processNextTurn();
+      }
+    } else if (gameState != GameState.GAME_OVER) {
+      // No animation, process game logic
+      switch (gameState) {
+        case START_ROUND:
+          turnOrder.clear();
+          entities.removeIf(e -> e.isDead);
+          turnOrder.addAll(entities);
+          turnOrder.sort(Comparator.comparingInt(e -> -e.initiative));
+          turnIndex = 0;
+          processNextTurn();
+          break;
+        case PLAYER_TURN:
+          player.determineIntent(this);
+          if (player.hasIntent()) {
+            player.executeAction(this);
+            if (player.isMoving) {
+              actionInProgress = true;
+            } else { // it was an attack or something instant
+              turnIndex++;
+              processNextTurn();
+            }
+          }
+          break;
+        case ENEMY_TURN:
+          Entity currentEntity = turnOrder.get(turnIndex);
+          currentEntity.determineIntent(this);
+          currentEntity.executeAction(this);
+          if (currentEntity instanceof Enemy && ((Enemy) currentEntity).isMoving) {
+            actionInProgress = true;
+          } else {
+            turnIndex++;
+            processNextTurn();
+          }
+          break;
+        case END_ROUND:
+          if (player.isDead) {
+            gameState = GameState.GAME_OVER;
+          } else {
+            gameState = GameState.START_ROUND;
+          }
+          break;
+        case GAME_OVER:
+          // No updates, just repaint the game over screen
+          break;
+      }
     }
   }
 
-  public void advanceTurn() {
-    if (player.isDead) return;
+  private void processNextTurn() {
+    if (turnIndex >= turnOrder.size()) {
+      gameState = GameState.END_ROUND;
+      return;
+    }
 
-    for (Enemy e : enemies) {
-        e.takeTurn();
+    Entity currentEntity = turnOrder.get(turnIndex);
+    if (currentEntity.isDead) {
+      turnIndex++;
+      processNextTurn();
+      return;
+    }
+
+    if (currentEntity instanceof Player) {
+      gameState = GameState.PLAYER_TURN;
+    } else {
+      gameState = GameState.ENEMY_TURN;
     }
   }
 
@@ -111,23 +197,21 @@ public class GamePanel extends JPanel implements Runnable {
 
     g2.setColor(Color.DARK_GRAY);
     for (int i = 0; i < maxScreenCol; i++) {
-        g2.drawLine(i * tileSize, 0, i * tileSize, screenHeight);
+      g2.drawLine(i * tileSize, 0, i * tileSize, screenHeight);
     }
     for (int i = 0; i < maxScreenRow; i++) {
-        g2.drawLine(0, i * tileSize, screenWidth, i * tileSize);
+      g2.drawLine(0, i * tileSize, screenWidth, i * tileSize);
     }
 
-    if (!player.isDead) {
-        player.draw(g2);
-    }
-
-    for (Enemy e : enemies) {
+    for (Entity e : entities) {
+      if (!e.isDead) {
         e.draw(g2);
+      }
     }
 
     if (player.isDead) {
-        g2.setColor(Color.RED);
-        g2.drawString("GAME OVER", screenWidth/2 - 40, screenHeight/2);
+      g2.setColor(Color.RED);
+      g2.drawString("GAME OVER", screenWidth / 2 - 40, screenHeight / 2);
     }
 
     g2.dispose();
