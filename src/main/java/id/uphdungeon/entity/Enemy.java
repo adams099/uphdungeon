@@ -5,9 +5,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.Random;
 
-public class Enemy extends Entity {
-  GamePanel gamePanel;
-
+public abstract class Enemy extends Entity {
   public boolean isMoving = false;
   public int targetX, targetY;
 
@@ -17,8 +15,18 @@ public class Enemy extends Entity {
 
   private Runnable intent = null;
 
-  public Enemy(GamePanel gamePanel, int startX, int startY, int dirX, int dirY, Color color) {
-    this.gamePanel = gamePanel;
+  public Enemy(
+    GamePanel gamePanel,
+    int startX,
+    int startY,
+    int dirX,
+    int dirY,
+    Color color,
+    int maxHealth,
+    int minDamage,
+    int maxDamage
+  ) {
+    super(gamePanel);
     this.x = startX;
     this.y = startY;
     this.targetX = startX;
@@ -30,23 +38,24 @@ public class Enemy extends Entity {
 
     this.initiative = new Random().nextInt(9) + 1; // Initiative from 1 to 9
 
-    this.maxHealth = 10;
-    this.health = 10;
-    this.minDamage = 1;
-    this.maxDamage = 3;
+    this.maxHealth = maxHealth;
+    this.health = maxHealth;
+    this.minDamage = minDamage;
+    this.maxDamage = maxDamage;
   }
 
   @Override
   public void determineIntent(GamePanel gamePanel) {
     if (intent == null && !isMoving && !isDead) {
-
       // check if player is adjacent
       Player player = gamePanel.getPlayer();
       if (!player.isDead) {
-        if ((x + gamePanel.tileSize == player.x && y == player.y)
-            || (x - gamePanel.tileSize == player.x && y == player.y)
-            || (x == player.x && y + gamePanel.tileSize == player.y)
-            || (x == player.x && y - gamePanel.tileSize == player.y)) {
+        if (
+          (x + gamePanel.tileSize == player.x && y == player.y) ||
+          (x - gamePanel.tileSize == player.x && y == player.y) ||
+          (x == player.x && y + gamePanel.tileSize == player.y) ||
+          (x == player.x && y - gamePanel.tileSize == player.y)
+        ) {
           intent = () -> this.attack(player);
           return; // end turn after deciding to attack
         }
@@ -56,11 +65,17 @@ public class Enemy extends Entity {
       int newTargetY = y + (dirY * gamePanel.tileSize);
 
       // Simple bounds checking to reverse direction
-      if (newTargetX < 0 || newTargetX + gamePanel.tileSize > gamePanel.screenWidth) {
+      if (
+        newTargetX < 0 ||
+        newTargetX + gamePanel.tileSize > gamePanel.screenWidth
+      ) {
         dirX *= -1;
         newTargetX = x + (dirX * gamePanel.tileSize);
       }
-      if (newTargetY < 0 || newTargetY + gamePanel.tileSize > gamePanel.screenHeight) {
+      if (
+        newTargetY < 0 ||
+        newTargetY + gamePanel.tileSize > gamePanel.screenHeight
+      ) {
         dirY *= -1;
         newTargetY = y + (dirY * gamePanel.tileSize);
       }
@@ -106,20 +121,52 @@ public class Enemy extends Entity {
   }
 
   @Override
+  public void updateFading() {
+    if (isFading) {
+      alpha -= 0.02f;
+      if (alpha < 0) {
+        alpha = 0;
+        isFading = false;
+      }
+    }
+  }
+
+  @Override
   public void draw(Graphics2D g2) {
-    if (!isDead) {
+    if (!isDead || isFading) {
+      if (isFading) {
+        g2.setComposite(
+          java.awt.AlphaComposite.getInstance(
+            java.awt.AlphaComposite.SRC_OVER,
+            alpha
+          )
+        );
+      }
+
       int spriteSize = (int) (gamePanel.tileSize * 0.8);
       int offset = (gamePanel.tileSize - spriteSize) / 2;
 
       g2.setColor(color);
       g2.fillRect(x + offset, y + offset, spriteSize, spriteSize);
 
-      // Draw health bar
-      g2.setColor(Color.RED);
-      g2.fillRect(x + offset, y + offset - 5, spriteSize, 4);
-      g2.setColor(Color.GREEN);
-      int hpWidth = (int) (((double) health / maxHealth) * spriteSize);
-      g2.fillRect(x + offset, y + offset - 5, hpWidth, 4);
+      if (!isDead) {
+        // Draw health bar only for living enemies
+        g2.setColor(Color.RED);
+        g2.fillRect(x + offset, y + offset - 5, spriteSize, 4);
+        g2.setColor(Color.GREEN);
+        int hpWidth = (int) (((double) health / maxHealth) * spriteSize);
+        g2.fillRect(x + offset, y + offset - 5, hpWidth, 4);
+      }
+
+      if (isFading) {
+        g2.setComposite(
+          java.awt.AlphaComposite.getInstance(
+            java.awt.AlphaComposite.SRC_OVER,
+            1f
+          )
+        );
+      }
     }
+    drawIndicators(g2);
   }
 }

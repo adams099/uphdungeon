@@ -1,8 +1,10 @@
 package id.uphdungeon;
 
+import id.uphdungeon.entity.Enemy;
 import id.uphdungeon.entity.Entity;
 import id.uphdungeon.entity.Player;
-import id.uphdungeon.entity.Enemy;
+import id.uphdungeon.entity.Rat;
+import id.uphdungeon.entity.Skeleton;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -36,7 +38,7 @@ public class GamePanel extends JPanel implements Runnable {
     PLAYER_TURN,
     ENEMY_TURN,
     GAME_OVER,
-    END_ROUND
+    END_ROUND,
   }
 
   private GameState gameState = GameState.START_ROUND;
@@ -52,9 +54,9 @@ public class GamePanel extends JPanel implements Runnable {
 
     player = new Player(this, keyHandler);
     entities.add(player);
-    entities.add(new Enemy(this, tileSize * 5, tileSize * 5, 1, 0, Color.RED));
-    entities.add(new Enemy(this, tileSize * 8, tileSize * 2, 0, 1, Color.BLUE));
-    entities.add(new Enemy(this, tileSize * 10, tileSize * 10, -1, -1, Color.GREEN));
+    entities.add(new Skeleton(this, tileSize * 5, tileSize * 5, 1, 0));
+    entities.add(new Rat(this, tileSize * 8, tileSize * 2, 0, 1));
+    entities.add(new Rat(this, tileSize * 10, tileSize * 10, -1, -1));
   }
 
   public Player getPlayer() {
@@ -100,6 +102,9 @@ public class GamePanel extends JPanel implements Runnable {
   }
 
   public void update() {
+    for (Entity e : entities) {
+      e.updateAnimations();
+    }
     if (actionInProgress) {
       // an animation is playing, just update all entities for animation
       for (Entity e : entities) e.update();
@@ -127,7 +132,7 @@ public class GamePanel extends JPanel implements Runnable {
       switch (gameState) {
         case START_ROUND:
           turnOrder.clear();
-          entities.removeIf(e -> e.isDead);
+          entities.removeIf(e -> e.isDead && !e.isFading);
           turnOrder.addAll(entities);
           turnOrder.sort(Comparator.comparingInt(e -> -e.initiative));
           turnIndex = 0;
@@ -139,7 +144,8 @@ public class GamePanel extends JPanel implements Runnable {
             player.executeAction(this);
             if (player.isMoving) {
               actionInProgress = true;
-            } else { // it was an attack or something instant
+            } else {
+              // it was an attack or something instant
               turnIndex++;
               processNextTurn();
             }
@@ -149,7 +155,9 @@ public class GamePanel extends JPanel implements Runnable {
           Entity currentEntity = turnOrder.get(turnIndex);
           currentEntity.determineIntent(this);
           currentEntity.executeAction(this);
-          if (currentEntity instanceof Enemy && ((Enemy) currentEntity).isMoving) {
+          if (
+            currentEntity instanceof Enemy && ((Enemy) currentEntity).isMoving
+          ) {
             actionInProgress = true;
           } else {
             turnIndex++;
@@ -204,14 +212,12 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     for (Entity e : entities) {
-      if (!e.isDead) {
-        e.draw(g2);
-      }
+      e.draw(g2);
     }
 
     if (player.isDead) {
       g2.setColor(Color.RED);
-      g2.drawString("GAME OVER", screenWidth / 2 - 40, screenHeight / 2);
+      g2.drawString("YOU DIED", screenWidth / 2 - 40, screenHeight / 2);
     }
 
     g2.dispose();

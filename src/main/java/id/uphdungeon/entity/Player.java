@@ -6,7 +6,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 
 public class Player extends Entity {
-  GamePanel gamePanel;
   KeyHandler keyH;
 
   public boolean isMoving = false;
@@ -15,7 +14,7 @@ public class Player extends Entity {
   private Runnable intent = null;
 
   public Player(GamePanel gamePanel, KeyHandler keyH) {
-    this.gamePanel = gamePanel;
+    super(gamePanel);
     this.keyH = keyH;
 
     // align with grid
@@ -108,17 +107,21 @@ public class Player extends Entity {
 
   @Override
   public void draw(Graphics2D g2) {
-    int spriteSize = (int) (gamePanel.tileSize * 0.8);
-    int offset = (gamePanel.tileSize - spriteSize) / 2;
+    if (!isDead) {
+      int spriteSize = (int) (gamePanel.tileSize * 0.8);
+      int offset = (gamePanel.tileSize - spriteSize) / 2;
 
-    g2.setColor(Color.WHITE);
-    g2.fillRect(x + offset, y + offset, spriteSize, spriteSize);
+      g2.setColor(Color.WHITE);
+      g2.fillRect(x + offset, y + offset, spriteSize, spriteSize);
 
-    // health bar above player
-    g2.setColor(Color.RED);
-    g2.fillRect(x + offset, y + offset - 5, spriteSize, 4);
-    g2.setColor(Color.GREEN);
-    int hpWidth = (int) (((double) health / maxHealth) * spriteSize);
-    g2.fillRect(x + offset, y + offset - 5, hpWidth, 4);
+      // health bar above player
+      g2.setColor(Color.RED);
+      g2.fillRect(x + offset, y + offset - 5, spriteSize, 4);
+      g2.setColor(Color.GREEN);
+      int hpWidth = (int) (((double) health / maxHealth) * spriteSize);
+      g2.fillRect(x + offset, y + offset - 5, hpWidth, 4);
+    }
+
+    drawIndicators(g2);
   }
 }
