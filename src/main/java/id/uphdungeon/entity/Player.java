@@ -51,44 +51,48 @@ public class Player extends Entity {
 
   @Override
   public void determineIntent(GamePanel gamePanel) {
-    if (intent == null && !isMoving && keyH.moveTriggered) {
-      int nextX = x;
-      int nextY = y;
+    if (intent == null && !isMoving && (keyH.moveTriggered || keyH.waitTriggered)) {
+      if (keyH.waitTriggered) {
+        intent = () -> {}; // Wait action, does nothing
+      } else if (keyH.moveTriggered) {
+        int nextX = x;
+        int nextY = y;
 
-      if (keyH.wasUpPressed) {
-        nextY -= gamePanel.tileSize;
-      }
-      if (keyH.wasDownPressed) {
-        nextY += gamePanel.tileSize;
-      }
-      if (keyH.wasLeftPressed) {
-        nextX -= gamePanel.tileSize;
-      }
-      if (keyH.wasRightPressed) {
-        nextX += gamePanel.tileSize;
-      }
+        if (keyH.wasUpPressed) {
+          nextY -= gamePanel.tileSize;
+        }
+        if (keyH.wasDownPressed) {
+          nextY += gamePanel.tileSize;
+        }
+        if (keyH.wasLeftPressed) {
+          nextX -= gamePanel.tileSize;
+        }
+        if (keyH.wasRightPressed) {
+          nextX += gamePanel.tileSize;
+        }
 
-      // cancel kalo pencet arahnya bertubrukan
-      if (keyH.wasUpPressed && keyH.wasDownPressed) nextY = y;
-      if (keyH.wasLeftPressed && keyH.wasRightPressed) nextX = x;
+        // cancel kalo pencet arahnya bertubrukan
+        if (keyH.wasUpPressed && keyH.wasDownPressed) nextY = y;
+        if (keyH.wasLeftPressed && keyH.wasRightPressed) nextX = x;
 
-      // initiative start only if player changed position
-      if (nextX != x || nextY != y) {
-        Entity targetEntity = gamePanel.getEntityAt(nextX, nextY);
+        // initiative start only if player changed position
+        if (nextX != x || nextY != y) {
+          Entity targetEntity = gamePanel.getEntityAt(nextX, nextY);
 
-        if (targetEntity != null) {
-          // if enemy exists attack enemy
-          if (targetEntity instanceof Enemy) {
-            intent = () -> this.attack(targetEntity);
+          if (targetEntity != null) {
+            // if enemy exists attack enemy
+            if (targetEntity instanceof Enemy) {
+              intent = () -> this.attack(targetEntity);
+            }
+          } else {
+            this.targetX = nextX;
+            this.targetY = nextY;
+            intent = () -> isMoving = true;
           }
-        } else {
-          this.targetX = nextX;
-          this.targetY = nextY;
-          intent = () -> isMoving = true;
         }
       }
 
-      keyH.consumeMove();
+      keyH.consumeAction();
     }
   }
 

@@ -4,9 +4,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 public class KeyHandler implements KeyListener {
-  public boolean upPressed, downPressed, leftPressed, rightPressed;
-  public boolean wasUpPressed, wasDownPressed, wasLeftPressed, wasRightPressed;
-  public boolean moveTriggered;
+  public boolean upPressed, downPressed, leftPressed, rightPressed, qPressed;
+  public boolean wasUpPressed, wasDownPressed, wasLeftPressed, wasRightPressed, wasWaitPressed;
+  public boolean moveTriggered, waitTriggered;
 
   @Override
   public void keyTyped(KeyEvent e) {
@@ -32,6 +32,10 @@ public class KeyHandler implements KeyListener {
       rightPressed = true;
       wasRightPressed = true;
     }
+    if (code == KeyEvent.VK_Q) {
+      qPressed = true;
+      wasWaitPressed = true;
+    }
   }
 
   @Override
@@ -49,6 +53,9 @@ public class KeyHandler implements KeyListener {
     if (code == KeyEvent.VK_D) {
       rightPressed = false;
     }
+    if (code == KeyEvent.VK_Q) {
+      qPressed = false;
+    }
 
     // triggers move only when all movement keys are released
     if (!upPressed && !downPressed && !leftPressed && !rightPressed) {
@@ -56,13 +63,22 @@ public class KeyHandler implements KeyListener {
         moveTriggered = true;
       }
     }
+
+    if (!qPressed) {
+      if (wasWaitPressed) {
+        waitTriggered = true;
+      }
+    }
   }
 
-  public void consumeMove() {
+  public void consumeAction() {
     moveTriggered = false;
     wasUpPressed = false;
     wasDownPressed = false;
     wasLeftPressed = false;
     wasRightPressed = false;
+
+    waitTriggered = false;
+    wasWaitPressed = false;
   }
 }
