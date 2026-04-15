@@ -11,6 +11,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.util.ArrayList;
 import java.util.Comparator;
 import javax.swing.JPanel;
@@ -55,6 +58,26 @@ public class GamePanel extends JPanel implements Runnable {
     // allows the panel to receive key inputs
     this.setFocusable(true);
     this.addKeyListener(keyHandler);
+
+    MouseAdapter mouseAdapter = new MouseAdapter() {
+      @Override
+      public void mouseMoved(MouseEvent e) {
+        activityLog.handleMouseMove(e.getX(), e.getY(), screenHeight);
+      }
+
+      @Override
+      public void mouseExited(MouseEvent e) {
+        activityLog.handleMouseMove(-1, -1, screenHeight);
+      }
+
+      @Override
+      public void mouseWheelMoved(MouseWheelEvent e) {
+        activityLog.handleMouseWheel(e.getWheelRotation());
+      }
+    };
+    this.addMouseListener(mouseAdapter);
+    this.addMouseMotionListener(mouseAdapter);
+    this.addMouseWheelListener(mouseAdapter);
 
     player = new Player(this, keyHandler);
     entities.add(player);
