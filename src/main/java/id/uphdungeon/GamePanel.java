@@ -64,9 +64,7 @@ public class GamePanel extends JPanel implements Runnable {
 
   public Entity getEntityAt(int x, int y) {
     for (Entity e : entities) {
-      if (!e.isDead && e.x == x && e.y == y) {
-        return e;
-      }
+      if (!e.isDead && e.x == x && e.y == y) return e;
     }
     return null;
   }
@@ -104,6 +102,7 @@ public class GamePanel extends JPanel implements Runnable {
     for (Entity e : entities) {
       e.updateAnimations();
     }
+
     if (actionInProgress) {
       // biar animasi semua Entity tetep jalan walau ga ada initiative
       for (Entity e : entities) e.update();
@@ -196,9 +195,11 @@ public class GamePanel extends JPanel implements Runnable {
     Graphics2D g2 = (Graphics2D) g;
 
     g2.setColor(Color.DARK_GRAY);
+
     for (int i = 0; i < maxScreenCol; i++) {
       g2.drawLine(i * tileSize, 0, i * tileSize, screenHeight);
     }
+
     for (int i = 0; i < maxScreenRow; i++) {
       g2.drawLine(0, i * tileSize, screenWidth, i * tileSize);
     }
