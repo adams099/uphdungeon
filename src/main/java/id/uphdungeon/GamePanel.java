@@ -5,10 +5,15 @@ import id.uphdungeon.entity.Entity;
 import id.uphdungeon.entity.Player;
 import id.uphdungeon.entity.Rat;
 import id.uphdungeon.entity.Skeleton;
+import id.uphdungeon.ui.ActivityLog;
+import id.uphdungeon.ui.DeathMessage;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.util.ArrayList;
 import java.util.Comparator;
 import javax.swing.JPanel;
@@ -42,6 +47,9 @@ public class GamePanel extends JPanel implements Runnable {
 
   private GameState gameState = GameState.START_ROUND;
 
+  private final ActivityLog activityLog = new ActivityLog();
+  private final DeathMessage deathMessage = new DeathMessage();
+
   public GamePanel() {
     this.setPreferredSize(new Dimension(screenWidth, screenHeight));
     this.setBackground(Color.BLACK);
@@ -51,11 +59,53 @@ public class GamePanel extends JPanel implements Runnable {
     this.setFocusable(true);
     this.addKeyListener(keyHandler);
 
+    MouseAdapter mouseAdapter = new MouseAdapter() {
+      @Override
+      public void mouseMoved(MouseEvent e) {
+        activityLog.handleMouseMove(e.getX(), e.getY(), screenHeight);
+      }
+
+      @Override
+      public void mouseExited(MouseEvent e) {
+        activityLog.handleMouseMove(-1, -1, screenHeight);
+      }
+
+      @Override
+      public void mouseWheelMoved(MouseWheelEvent e) {
+        activityLog.handleMouseWheel(e.getWheelRotation());
+      }
+
+      @Override
+      public void mousePressed(MouseEvent e) {
+        if (gameState == GameState.PLAYER_TURN && !actionInProgress) {
+          handleMouseClick(e.getX(), e.getY());
+        }
+      }
+    };
+    this.addMouseListener(mouseAdapter);
+    this.addMouseMotionListener(mouseAdapter);
+    this.addMouseWheelListener(mouseAdapter);
+
     player = new Player(this, keyHandler);
     entities.add(player);
     entities.add(new Skeleton(this, tileSize * 5, tileSize * 5, 1, 0));
     entities.add(new Rat(this, tileSize * 8, tileSize * 2, 0, 1));
     entities.add(new Rat(this, tileSize * 10, tileSize * 10, -1, -1));
+
+    addLogMessage("Welcome to UPH Dungeon!", Color.YELLOW);
+  }
+
+  public void handleMouseClick(int mouseX, int mouseY) {
+    int col = mouseX / tileSize;
+    int row = mouseY / tileSize;
+
+    if (col >= 0 && col < maxScreenCol && row >= 0 && row < maxScreenRow) {
+      player.setPath(col, row);
+    }
+  }
+
+  public void addLogMessage(String text, Color color) {
+    activityLog.addLogMessage(text, color);
   }
 
   public Player getPlayer() {
@@ -208,9 +258,10 @@ public class GamePanel extends JPanel implements Runnable {
       e.draw(g2);
     }
 
+    activityLog.draw(g2, screenHeight);
+
     if (player.isDead) {
-      g2.setColor(Color.RED);
-      g2.drawString("YOU DIED", screenWidth / 2 - 40, screenHeight / 2);
+      deathMessage.draw(g2, screenWidth, screenHeight);
     }
 
     g2.dispose();
