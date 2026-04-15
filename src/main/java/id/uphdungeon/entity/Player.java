@@ -51,9 +51,13 @@ public class Player extends Entity {
 
   @Override
   public void determineIntent(GamePanel gamePanel) {
-    if (intent == null && !isMoving && (keyH.moveTriggered || keyH.waitTriggered)) {
+    if (
+      intent == null && !isMoving && (keyH.moveTriggered || keyH.waitTriggered)
+    ) {
       if (keyH.waitTriggered) {
-        intent = () -> {}; // Wait action, does nothing
+        intent = () -> {
+          gamePanel.addLogMessage("Player waited.", Color.CYAN);
+        };
       } else if (keyH.moveTriggered) {
         int nextX = x;
         int nextY = y;

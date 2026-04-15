@@ -5,6 +5,8 @@ import id.uphdungeon.entity.Entity;
 import id.uphdungeon.entity.Player;
 import id.uphdungeon.entity.Rat;
 import id.uphdungeon.entity.Skeleton;
+import id.uphdungeon.ui.ActivityLog;
+import id.uphdungeon.ui.DeathMessage;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -42,6 +44,9 @@ public class GamePanel extends JPanel implements Runnable {
 
   private GameState gameState = GameState.START_ROUND;
 
+  private final ActivityLog activityLog = new ActivityLog();
+  private final DeathMessage deathMessage = new DeathMessage();
+
   public GamePanel() {
     this.setPreferredSize(new Dimension(screenWidth, screenHeight));
     this.setBackground(Color.BLACK);
@@ -56,6 +61,12 @@ public class GamePanel extends JPanel implements Runnable {
     entities.add(new Skeleton(this, tileSize * 5, tileSize * 5, 1, 0));
     entities.add(new Rat(this, tileSize * 8, tileSize * 2, 0, 1));
     entities.add(new Rat(this, tileSize * 10, tileSize * 10, -1, -1));
+
+    addLogMessage("Welcome to UPH Dungeon!", Color.YELLOW);
+  }
+
+  public void addLogMessage(String text, Color color) {
+    activityLog.addLogMessage(text, color);
   }
 
   public Player getPlayer() {
@@ -208,9 +219,10 @@ public class GamePanel extends JPanel implements Runnable {
       e.draw(g2);
     }
 
+    activityLog.draw(g2, screenHeight);
+
     if (player.isDead) {
-      g2.setColor(Color.RED);
-      g2.drawString("YOU DIED", screenWidth / 2 - 40, screenHeight / 2);
+      deathMessage.draw(g2, screenWidth, screenHeight);
     }
 
     g2.dispose();

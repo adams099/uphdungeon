@@ -2,7 +2,7 @@ package id.uphdungeon.entity;
 
 import id.uphdungeon.GamePanel;
 import id.uphdungeon.ui.DamageIndicator;
-
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,23 +68,23 @@ public abstract class Entity {
     int indicatorY = target.y;
     target.addDamageIndicator(String.valueOf(damage), indicatorX, indicatorY);
 
-    System.out.println(
+    String message =
       this.getClass().getSimpleName() +
-        " attacked " +
-        target.getClass().getSimpleName() +
-        " for " +
-        damage +
-        " damage! (" +
-        target.health +
-        "/" +
-        target.maxHealth +
-        " HP left)"
-    );
+      " attacked " +
+      target.getClass().getSimpleName() +
+      " for " +
+      damage +
+      " damage!";
+    Color color = (this instanceof Player) ? Color.LIGHT_GRAY : Color.ORANGE;
+    gamePanel.addLogMessage(message, color);
 
     if (target.health <= 0) {
       target.isDead = true;
       target.isFading = true;
-      System.out.println(target.getClass().getSimpleName() + " died!");
+      gamePanel.addLogMessage(
+        target.getClass().getSimpleName() + " died!",
+        Color.RED
+      );
     }
   }
 
