@@ -62,7 +62,7 @@ public class PlayerSpriteManager {
                 }
                 images[i] = img;
             } catch (IOException e) {
-                // Fail loudly during development — missing sprites should never be silent.
+                // Fail loudly during development - missing sprites should never be silent.
                 throw new RuntimeException("Failed to load sprite: " + path, e);
             }
         }
