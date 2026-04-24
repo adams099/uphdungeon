@@ -1,13 +1,5 @@
 package id.uphdungeon;
 
-import id.uphdungeon.entity.Enemy;
-import id.uphdungeon.entity.Entity;
-import id.uphdungeon.entity.Player;
-import id.uphdungeon.entity.Rat;
-import id.uphdungeon.entity.Skeleton;
-import id.uphdungeon.ui.ActivityLog;
-import id.uphdungeon.ui.DeathMessage;
-import id.uphdungeon.utils.TileManager;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -17,9 +9,21 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.util.ArrayList;
 import java.util.Comparator;
+
 import javax.swing.JPanel;
 
+import id.uphdungeon.entity.Enemy;
+import id.uphdungeon.entity.Entity;
+import id.uphdungeon.entity.Player;
+import id.uphdungeon.entity.Rat;
+import id.uphdungeon.entity.Skeleton;
+import id.uphdungeon.ui.ActivityLog;
+import id.uphdungeon.ui.DeathMessage;
+import id.uphdungeon.ui.WaitButton;
+import id.uphdungeon.utils.TileManager;
+
 public class GamePanel extends JPanel implements Runnable {
+
   public final int originalTileSize = 16;
   public final int scale = 3;
   public final int tileSize = originalTileSize * scale;
@@ -53,11 +57,14 @@ public class GamePanel extends JPanel implements Runnable {
 
   private final ActivityLog activityLog = new ActivityLog();
   private final DeathMessage deathMessage = new DeathMessage();
+  private final WaitButton waitButton;
 
   public GamePanel() {
     this.setPreferredSize(new Dimension(screenWidth, screenHeight));
     this.setBackground(Color.BLACK);
     this.setDoubleBuffered(true);
+
+    this.waitButton = new WaitButton(screenWidth, screenHeight);
 
     // allows the panel to receive key inputs
     this.setFocusable(true);
@@ -67,11 +74,13 @@ public class GamePanel extends JPanel implements Runnable {
       @Override
       public void mouseMoved(MouseEvent e) {
         activityLog.handleMouseMove(e.getX(), e.getY(), screenHeight);
+        waitButton.update(e.getX(), e.getY());
       }
 
       @Override
       public void mouseExited(MouseEvent e) {
         activityLog.handleMouseMove(-1, -1, screenHeight);
+        waitButton.update(-1, 1);
       }
 
       @Override
@@ -103,6 +112,11 @@ public class GamePanel extends JPanel implements Runnable {
   }
 
   public void handleMouseClick(int mouseX, int mouseY) {
+    if (waitButton.isClicked(mouseX, mouseY)) {
+      keyHandler.waitTriggered = true;
+      return;  
+    }
+    
     int col = mouseX / tileSize;
     int row = mouseY / tileSize;
 
@@ -268,6 +282,7 @@ public class GamePanel extends JPanel implements Runnable {
       e.draw(g2);
     }
 
+    waitButton.draw(g2);
     activityLog.draw(g2, screenHeight);
 
     if (player.isDead) {
