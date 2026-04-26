@@ -10,10 +10,11 @@ import javax.imageio.ImageIO;
 public class PlayerSpriteManager {
     // Tick per frame 60 FPS: if 10 ticks =60 / 10 = 6 fps
     private static final int WALK_FRAME_DURATION = 10;
-    private static final int ATTACK_FRAME_DURATION = 8;
+    private static final int ATTACK_FRAME_DURATION = 15;
     private static final int IDLE_FRAME_DURATION = 30;
+    private static final int CONSUME_FRAME_DURATION = 20;
 
-    // Enumaration map for PlayerAnimationState
+    // Enumeration map for PlayerAnimationState
     private final Map<PlayerAnimationState, Animation> animations = new EnumMap<>(PlayerAnimationState.class);
 
     // construc to load the animations
@@ -48,6 +49,9 @@ public class PlayerSpriteManager {
 
         animations.put(PlayerAnimationState.ATTACK_RIGHT,
                 new Animation(frames("AR.png", "AR.png"), ATTACK_FRAME_DURATION, false));
+
+        animations.put(PlayerAnimationState.CONSUME,
+                new Animation(frames("E1.png", "E2.png"), CONSUME_FRAME_DURATION, false));
     }
 
     // Method for loading frames from resource files

@@ -1,22 +1,10 @@
 package id.uphdungeon.entity.animation;
 
-// Marker interface for all enemy animation state enums.
-// Each enemy's state enum (RatAnimationState, SkeletonAnimationState, etc.)
-// implements this interface so EnemyAnimated can reference states generically
-// without being coupled to any specific enemy type.
-//
-// Usage example:
-//   public enum RatAnimationState implements EnemyAnimationState { ... }
-//
-// EnemyAnimated then works with EnemyAnimationState references for
-// transitionTo(), death state detection, and walk state resolution.
+// Interface for enemy animation state, to determine if the enemy is in death or walk state
 public interface EnemyAnimationState {
-
-  // Returns true if this state is the death animation state.
-  // Used by EnemyAnimated.updateFading() to detect when death has begun.
+  // Method to check if the enemy is in death state
   boolean isDeath();
 
-  // Returns true if this state is a walk state (any direction).
-  // Used by EnemyAnimated to decide whether to cache lastWalkFrame.
+  // Method to check if the enemy is in walk state
   boolean isWalk();
 }
