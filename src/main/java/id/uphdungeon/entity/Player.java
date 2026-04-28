@@ -29,6 +29,9 @@ public class Player extends Entity {
   private Animation currentAnimation;
   private boolean attackAnimationPending = false; // for returning to idle
   private boolean facingLeft = false; // attack defualt direction Right
+  private boolean consumeAnimationPending = false; // consume plays once then returns to idle
+  private boolean hasMovedOnce = false; // tracks if player has ever moved to switch idle behavior
+  private BufferedImage lastWalkFrame = null; // holds last walk frame to keep facing direction when stopped
 
   // constructor for player, sets initial position, stats, and idle animation
   public Player(GamePanel gamePanel, KeyHandler keyH) {
@@ -56,12 +59,17 @@ public class Player extends Entity {
 
   // Method to trigger posisition atttack animation Right or Left
   public void triggerAttackAnimation(Entity target) {
-
     boolean attackLeft = (target.x < x) || (target.x == x && facingLeft);
     PlayerAnimationState attackState = attackLeft ? PlayerAnimationState.ATTACK_LEFT
         : PlayerAnimationState.ATTACK_RIGHT;
     transitionTo(attackState);
     attackAnimationPending = true;
+  }
+
+  // Method to trigger consume animation
+  public void triggerConsumeAnimation() {
+    transitionTo(PlayerAnimationState.CONSUME);
+    consumeAnimationPending = true;
   }
 
   // Method direction walk animation
@@ -117,24 +125,37 @@ public class Player extends Entity {
   public void updateAnimations() {
     super.updateAnimations(); // handles damage indicators & fading
 
+    // Attack has highest priority plays fully before anything else
     if (attackAnimationPending) {
-      // Keep play attack animation until it finishes
       currentAnimation.update();
       if (currentAnimation.isFinished()) {
         attackAnimationPending = false;
-        transitionTo(PlayerAnimationState.IDLE);
+        // Return to last walk frame if moved 
+        if (hasMovedOnce && lastWalkFrame != null) {
+          transitionTo(PlayerAnimationState.IDLE);
+        } else {
+          transitionTo(PlayerAnimationState.IDLE);
+        }
       }
       return;
     }
 
-    // If not attacking then walk or idle state
-    if (isMoving) {
-      transitionTo(resolveWalkState());
-    } else {
-      transitionTo(PlayerAnimationState.IDLE);
+    // Consume has second priority plays fully before walk or idle
+    if (consumeAnimationPending) {
+      currentAnimation.update();
+      if (currentAnimation.isFinished()) {
+        consumeAnimationPending = false;
+      }
+      return;
     }
 
-    currentAnimation.update();
+    if (isMoving) {
+      transitionTo(resolveWalkState());
+      hasMovedOnce = true;
+      currentAnimation.update();
+      // Cache last walk frame so Player holds direction when stopped
+      lastWalkFrame = currentAnimation.getCurrentFrame();
+    }
   }
 
   // Draw method handles mirroring walk-right, fallback rectangle, health bar, and
@@ -146,7 +167,7 @@ public class Player extends Entity {
       return;
     }
 
-    BufferedImage frame = currentAnimation.getCurrentFrame();
+    BufferedImage frame = resolveDrawFrame();
 
     if (frame != null) {
       int drawX = x;
@@ -244,6 +265,16 @@ public class Player extends Entity {
               triggerAttackAnimation(targetEntity);
               this.attack(targetEntity);
             };
+          } else if (gamePanel.getPotionManager().isPotionAt(nextX, nextY)) {
+            // potion tile — move there and consume
+            final int px = nextX;
+            final int py = nextY;
+            this.targetX = px;
+            this.targetY = py;
+            intent = () -> {
+              isMoving = true;
+              gamePanel.getPotionManager().onPlayerPickup(this);
+            };
           } else {
             this.targetX = nextX;
             this.targetY = nextY;
@@ -330,6 +361,17 @@ public class Player extends Entity {
           this.attack(enemyToAttack);
         };
         currentPath = null;
+      } else if (gamePanel.getPotionManager().isPotionAt(nextX, nextY)) {
+        // potion on pathfinding route — step on it and consume
+        final int px = nextX;
+        final int py = nextY;
+        this.targetX = px;
+        this.targetY = py;
+        intent = () -> {
+          isMoving = true;
+          gamePanel.getPotionManager().onPlayerPickup(this);
+        };
+        currentPath.poll();
       } else if (targetEntity == null) {
         this.targetX = nextX;
         this.targetY = nextY;
@@ -352,6 +394,25 @@ public class Player extends Entity {
 
   public boolean hasIntent() {
     return intent != null;
+  }
+
+  // Resolves the correct frame to draw based on current animation state and movement
+  private BufferedImage resolveDrawFrame() {
+    if (attackAnimationPending || consumeAnimationPending) {
+      return currentAnimation.getCurrentFrame();
+    }
+
+    if (isMoving) {
+      return currentAnimation.getCurrentFrame();
+    }
+
+    // After first move, hold last direction frame as idle
+    if (hasMovedOnce && lastWalkFrame != null) {
+      return lastWalkFrame;
+    }
+
+    // Before first move, show spawn default
+    return currentAnimation.getCurrentFrame();
   }
 
   private void drawHealthBar(Graphics2D g2) {

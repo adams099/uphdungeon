@@ -8,5 +8,6 @@ public enum PlayerAnimationState {
   WALK_UP,
   WALK_DOWN,
   ATTACK_LEFT,
-  ATTACK_RIGHT
+  ATTACK_RIGHT,
+  CONSUME
 }
