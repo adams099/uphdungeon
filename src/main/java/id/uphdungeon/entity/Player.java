@@ -248,28 +248,33 @@ public class Player extends Entity {
 
         // initiative start only if player changed position
         if (nextX != x || nextY != y) {
-          Entity targetEntity = gamePanel.getEntityAt(nextX, nextY);
-
-          if (targetEntity instanceof Enemy) {
-            // if enemy exists attack enemy
-            intent = () -> {
-              triggerAttackAnimation(targetEntity);
-              this.attack(targetEntity);
-            };
-          } else if (gamePanel.getPotionManager().isPotionAt(nextX, nextY)) {
-            // potion tile — move there and consume
-            final int px = nextX;
-            final int py = nextY;
-            this.targetX = px;
-            this.targetY = py;
-            intent = () -> {
-              isMoving = true;
-              gamePanel.getPotionManager().onPlayerPickup(this);
-            };
+          if (nextX < 0 || nextX >= gamePanel.screenWidth || nextY < 0
+              || nextY >= gamePanel.screenHeight) {
+            gamePanel.addLogMessage("You cannot move outside of the screen.", Color.ORANGE);
           } else {
-            this.targetX = nextX;
-            this.targetY = nextY;
-            intent = () -> isMoving = true;
+            Entity targetEntity = gamePanel.getEntityAt(nextX, nextY);
+
+            if (targetEntity instanceof Enemy) {
+              // if enemy exists attack enemy
+              intent = () -> {
+                triggerAttackAnimation(targetEntity);
+                this.attack(targetEntity);
+              };
+            } else if (gamePanel.getPotionManager().isPotionAt(nextX, nextY)) {
+              // potion tile — move there and consume
+              final int px = nextX;
+              final int py = nextY;
+              this.targetX = px;
+              this.targetY = py;
+              intent = () -> {
+                isMoving = true;
+                gamePanel.getPotionManager().onPlayerPickup(this);
+              };
+            } else {
+              this.targetX = nextX;
+              this.targetY = nextY;
+              intent = () -> isMoving = true;
+            }
           }
         }
       }
