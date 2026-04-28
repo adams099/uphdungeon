@@ -20,6 +20,11 @@ public class Skeleton extends EnemyAnimated {
     return spriteManager;
   }
 
+  @Override
+  public int getExpReward() {
+    return 30;
+  }
+
   // Determine the intent of the skeleton, and trigger attack animation if player is adjacent
   @Override
   public void determineIntent(GamePanel gamePanel) {

@@ -20,6 +20,7 @@ import id.uphdungeon.entity.Skeleton;
 import id.uphdungeon.potion.PotionManager;
 import id.uphdungeon.ui.ActivityLog;
 import id.uphdungeon.ui.DeathMessage;
+import id.uphdungeon.ui.PlayerStatusUI;
 import id.uphdungeon.ui.RetryButton;
 import id.uphdungeon.ui.WaitButton;
 import id.uphdungeon.utils.TileManager;
@@ -64,6 +65,7 @@ public class GamePanel extends JPanel implements Runnable {
   private final DeathMessage deathMessage = new DeathMessage();
   private final WaitButton waitButton;
   private final RetryButton retryButton;
+  private final PlayerStatusUI playerStatusUI;
 
   public GamePanel() {
     this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -72,6 +74,7 @@ public class GamePanel extends JPanel implements Runnable {
 
     this.waitButton = new WaitButton(screenWidth, screenHeight);
     this.retryButton = new RetryButton(screenWidth, screenHeight);
+    this.playerStatusUI = new PlayerStatusUI(this);
 
     // allows the panel to receive key inputs
     this.setFocusable(true);
@@ -81,6 +84,7 @@ public class GamePanel extends JPanel implements Runnable {
       @Override
       public void mouseMoved(MouseEvent e) {
         activityLog.handleMouseMove(e.getX(), e.getY(), screenHeight);
+        playerStatusUI.updateMousePosition(e.getX(), e.getY());
         waitButton.update(e.getX(), e.getY());
         if (player != null && player.isDead) {
           retryButton.update(e.getX(), e.getY());
@@ -90,6 +94,7 @@ public class GamePanel extends JPanel implements Runnable {
       @Override
       public void mouseExited(MouseEvent e) {
         activityLog.handleMouseMove(-1, -1, screenHeight);
+        playerStatusUI.updateMousePosition(-1, -1);
         waitButton.update(-1, 1);
         retryButton.update(-1, -1);
       }
@@ -332,6 +337,7 @@ public class GamePanel extends JPanel implements Runnable {
       e.draw(g2);
     }
 
+    playerStatusUI.draw(g2);
     waitButton.draw(g2);
     activityLog.draw(g2, screenHeight);
 

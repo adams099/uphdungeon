@@ -22,6 +22,11 @@ public class Rat extends EnemyAnimated {
     return spriteManager;
   }
 
+  @Override
+  public int getExpReward() {
+    return 10;
+  }
+
   // Determine the intent of the rat, and trigger attack animation if player is adjacent
   @Override
   public void determineIntent(GamePanel gamePanel) {

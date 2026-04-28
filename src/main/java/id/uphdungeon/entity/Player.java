@@ -25,6 +25,7 @@ public class Player extends Entity {
 
   // Animation state
   private final PlayerSpriteManager spriteManager = new PlayerSpriteManager();
+  private final PlayerStatusManager playerStatusManager;
   private PlayerAnimationState currentState = PlayerAnimationState.IDLE;
   private Animation currentAnimation;
   private boolean attackAnimationPending = false; // for returning to idle
@@ -54,8 +55,14 @@ public class Player extends Entity {
     this.targetX = this.x;
     this.targetY = this.y;
 
+    this.playerStatusManager = new PlayerStatusManager(this, gamePanel);
+
     // Initialise with idle animation
     currentAnimation = spriteManager.getAnimation(PlayerAnimationState.IDLE);
+  }
+
+  public PlayerStatusManager getStatusManager() {
+    return playerStatusManager;
   }
 
   // Method to trigger posisition atttack animation Right or Left

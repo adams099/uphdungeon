@@ -37,6 +37,8 @@ public abstract class Enemy extends Entity {
     this.maxDamage = maxDamage;
   }
 
+  public abstract int getExpReward();
+
   @Override
   public void determineIntent(GamePanel gamePanel) {
     if (intent == null && !isMoving && !isDead) {

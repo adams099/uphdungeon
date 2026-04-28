@@ -78,6 +78,10 @@ public abstract class Entity {
       target.isDead = true;
       target.isFading = true;
       gamePanel.addLogMessage(target.getClass().getSimpleName() + " died!", Color.RED);
+
+      if (this instanceof Player && target instanceof Enemy) {
+        ((Player) this).getStatusManager().addExperience(((Enemy) target).getExpReward());
+      }
     }
   }
 
