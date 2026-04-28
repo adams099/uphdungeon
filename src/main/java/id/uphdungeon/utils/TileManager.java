@@ -28,10 +28,8 @@ public class TileManager {
   // Returns true if the given grid position blocks movement.
   // All floor tiles are passable — wall tiles added later will return true.
   public boolean hasCollision(int col, int row) {
-    if (col < 0 || col >= gamePanel.maxScreenCol)
-      return true;
-    if (row < 0 || row >= gamePanel.maxScreenRow)
-      return true;
+    if (col < 0 || col >= gamePanel.maxScreenCol) return true;
+    if (row < 0 || row >= gamePanel.maxScreenRow) return true;
     return false;
   }
 

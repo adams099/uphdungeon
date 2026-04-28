@@ -11,10 +11,7 @@ public class DeathMessage {
     String deathMessage = "YOU DIED";
     int stringWidth = g2.getFontMetrics().stringWidth(deathMessage);
     int stringHeight = g2.getFontMetrics().getHeight();
-    g2.drawString(
-      deathMessage,
-      (screenWidth / 2) - (stringWidth / 2),
-      (screenHeight / 2) + (stringHeight / 4)
-    );
+    g2.drawString(deathMessage, (screenWidth / 2) - (stringWidth / 2),
+        (screenHeight / 2) + (stringHeight / 4));
   }
 }

@@ -15,17 +15,8 @@ public abstract class Enemy extends Entity {
 
   private Runnable intent = null;
 
-  public Enemy(
-    GamePanel gamePanel,
-    int startX,
-    int startY,
-    int dirX,
-    int dirY,
-    Color color,
-    int maxHealth,
-    int minDamage,
-    int maxDamage
-  ) {
+  public Enemy(GamePanel gamePanel, int startX, int startY, int dirX, int dirY, Color color,
+      int maxHealth, int minDamage, int maxDamage) {
     super(gamePanel);
     this.x = startX;
     this.y = startY;
@@ -55,11 +46,8 @@ public abstract class Enemy extends Entity {
         int deltaX = Math.abs(player.x - this.x);
         int deltaY = Math.abs(player.y - this.y);
 
-        if (
-          deltaX <= gamePanel.tileSize &&
-          deltaY <= gamePanel.tileSize &&
-          (deltaX != 0 || deltaY != 0)
-        ) {
+        if (deltaX <= gamePanel.tileSize && deltaY <= gamePanel.tileSize
+            && (deltaX != 0 || deltaY != 0)) {
           intent = () -> this.attack(player);
           return;
         }
@@ -69,17 +57,11 @@ public abstract class Enemy extends Entity {
       int newTargetY = y + (dirY * gamePanel.tileSize);
 
       // cek arah sebaliknya
-      if (
-        newTargetX < 0 ||
-        newTargetX + gamePanel.tileSize > gamePanel.screenWidth
-      ) {
+      if (newTargetX < 0 || newTargetX + gamePanel.tileSize > gamePanel.screenWidth) {
         dirX *= -1;
         newTargetX = x + (dirX * gamePanel.tileSize);
       }
-      if (
-        newTargetY < 0 ||
-        newTargetY + gamePanel.tileSize > gamePanel.screenHeight
-      ) {
+      if (newTargetY < 0 || newTargetY + gamePanel.tileSize > gamePanel.screenHeight) {
         dirY *= -1;
         newTargetY = y + (dirY * gamePanel.tileSize);
       }
@@ -140,11 +122,7 @@ public abstract class Enemy extends Entity {
     if (!isDead || isFading) {
       if (isFading) {
         g2.setComposite(
-          java.awt.AlphaComposite.getInstance(
-            java.awt.AlphaComposite.SRC_OVER,
-            alpha
-          )
-        );
+            java.awt.AlphaComposite.getInstance(java.awt.AlphaComposite.SRC_OVER, alpha));
       }
 
       int spriteSize = (int) (gamePanel.tileSize * 0.8);
@@ -163,12 +141,7 @@ public abstract class Enemy extends Entity {
       }
 
       if (isFading) {
-        g2.setComposite(
-          java.awt.AlphaComposite.getInstance(
-            java.awt.AlphaComposite.SRC_OVER,
-            1f
-          )
-        );
+        g2.setComposite(java.awt.AlphaComposite.getInstance(java.awt.AlphaComposite.SRC_OVER, 1f));
       }
     }
     drawIndicators(g2);

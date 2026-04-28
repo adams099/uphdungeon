@@ -32,8 +32,8 @@ public abstract class EnemyAnimated extends Enemy {
   protected BufferedImage lastWalkFrame = null;
 
   // Constructor EnemyAnimated
-  public EnemyAnimated(GamePanel gamePanel, int startX, int startY, int dirX, int dirY, Color color, int maxHealth,
-      int minDamage, int maxDamage) {
+  public EnemyAnimated(GamePanel gamePanel, int startX, int startY, int dirX, int dirY, Color color,
+      int maxHealth, int minDamage, int maxDamage) {
     super(gamePanel, startX, startY, dirX, dirY, color, maxHealth, minDamage, maxDamage);
   }
 
@@ -57,8 +57,7 @@ public abstract class EnemyAnimated extends Enemy {
 
   // Transitions to a new animation state, resetting the animation if the state changes
   protected void transitionTo(EnemyAnimationState newState) {
-    if (newState == currentState)
-      return;
+    if (newState == currentState) return;
     currentState = newState;
     currentAnimation = getSpriteManager().getAnimation(newState);
     currentAnimation.reset();
@@ -70,7 +69,8 @@ public abstract class EnemyAnimated extends Enemy {
     int dy = targetY - y;
 
     if (Math.abs(dx) >= Math.abs(dy)) {
-      return dx < 0 ? getSpriteManager().getWalkLeftState() : getSpriteManager().getWalkRightState();
+      return dx < 0 ? getSpriteManager().getWalkLeftState()
+          : getSpriteManager().getWalkRightState();
     } else {
       return dy < 0 ? getSpriteManager().getWalkUpState() : getSpriteManager().getWalkDownState();
     }
@@ -157,7 +157,8 @@ public abstract class EnemyAnimated extends Enemy {
       BufferedImage frame = resolveDrawFrame();
 
       if (frame != null) {
-        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+            RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
         g2.drawImage(frame, x, y, gamePanel.tileSize, gamePanel.tileSize, null);
       } else {
         // Display colored rectangle if sprites are missing

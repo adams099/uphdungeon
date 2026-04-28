@@ -1,5 +1,6 @@
 /*
- * Code based on: https://github.com/watabou/PD-classes/blob/master/com/watabou/utils/PathFinder.java
+ * Code based on:
+ * https://github.com/watabou/PD-classes/blob/master/com/watabou/utils/PathFinder.java
  *
  * We use the referred code for some logic, and adjust logic based on our game repository.
  *
@@ -9,18 +10,16 @@
 /*
  * Copyright (C) 2012-2015 Oleg Dolya
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <http://www.gnu.org/licenses/>
  */
 
 package id.uphdungeon.utils;
@@ -42,16 +41,7 @@ public class PathFinder {
       PathFinder.width = width;
       distance = new int[size];
       queue = new int[size];
-      dir = new int[] {
-        -1,
-        +1,
-        -width,
-        +width,
-        -width - 1,
-        -width + 1,
-        +width - 1,
-        +width + 1,
-      };
+      dir = new int[] {-1, +1, -width, +width, -width - 1, -width + 1, +width - 1, +width + 1,};
     }
   }
 
@@ -97,11 +87,7 @@ public class PathFinder {
     return Math.abs(ax - bx) <= 1 && Math.abs(ay - by) <= 1;
   }
 
-  private static boolean buildDistanceMap(
-    int from,
-    int to,
-    boolean[] passable
-  ) {
+  private static boolean buildDistanceMap(int from, int to, boolean[] passable) {
     if (from == to) {
       return false;
     }

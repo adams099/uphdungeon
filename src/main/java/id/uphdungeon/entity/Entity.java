@@ -69,23 +69,15 @@ public abstract class Entity {
     int indicatorY = target.y;
     target.addDamageIndicator(String.valueOf(damage), indicatorX, indicatorY);
 
-    String message =
-      this.getClass().getSimpleName() +
-      " attacked " +
-      target.getClass().getSimpleName() +
-      " for " +
-      damage +
-      " damage!";
+    String message = this.getClass().getSimpleName() + " attacked "
+        + target.getClass().getSimpleName() + " for " + damage + " damage!";
     Color color = (this instanceof Player) ? Color.LIGHT_GRAY : Color.ORANGE;
     gamePanel.addLogMessage(message, color);
 
     if (target.health <= 0) {
       target.isDead = true;
       target.isFading = true;
-      gamePanel.addLogMessage(
-        target.getClass().getSimpleName() + " died!",
-        Color.RED
-      );
+      gamePanel.addLogMessage(target.getClass().getSimpleName() + " died!", Color.RED);
     }
   }
 

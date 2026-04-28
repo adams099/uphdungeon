@@ -121,9 +121,9 @@ public class GamePanel extends JPanel implements Runnable {
   public void handleMouseClick(int mouseX, int mouseY) {
     if (waitButton.isClicked(mouseX, mouseY)) {
       keyHandler.waitTriggered = true;
-      return;  
+      return;
     }
-    
+
     int col = mouseX / tileSize;
     int row = mouseY / tileSize;
 
@@ -191,7 +191,8 @@ public class GamePanel extends JPanel implements Runnable {
 
     if (actionInProgress) {
       // biar animasi semua Entity tetep jalan walau ga ada initiative
-      for (Entity e : entities) e.update();
+      for (Entity e : entities)
+        e.update();
 
       boolean isAnimationDone = true;
       for (Entity e : entities) {
@@ -239,9 +240,7 @@ public class GamePanel extends JPanel implements Runnable {
           Entity currentEntity = turnOrder.get(turnIndex);
           currentEntity.determineIntent(this);
           currentEntity.executeAction(this);
-          if (
-            currentEntity instanceof Enemy && ((Enemy) currentEntity).isMoving
-          ) {
+          if (currentEntity instanceof Enemy && ((Enemy) currentEntity).isMoving) {
             actionInProgress = true;
           } else {
             turnIndex++;
@@ -289,10 +288,10 @@ public class GamePanel extends JPanel implements Runnable {
     // 2. Draw grid lines on top of tiles for visual reference
     // g2.setColor(Color.DARK_GRAY);
     // for (int i = 0; i < maxScreenCol; i++) {
-    //   g2.drawLine(i * tileSize, 0, i * tileSize, screenHeight);
+    // g2.drawLine(i * tileSize, 0, i * tileSize, screenHeight);
     // }
     // for (int i = 0; i < maxScreenRow; i++) {
-    //   g2.drawLine(0, i * tileSize, screenWidth, i * tileSize);
+    // g2.drawLine(0, i * tileSize, screenWidth, i * tileSize);
     // }
 
     // 3. Draw potion between floor and entities so it appears under Player/Enemy

@@ -31,7 +31,8 @@ public class Player extends Entity {
   private boolean facingLeft = false; // attack defualt direction Right
   private boolean consumeAnimationPending = false; // consume plays once then returns to idle
   private boolean hasMovedOnce = false; // tracks if player has ever moved to switch idle behavior
-  private BufferedImage lastWalkFrame = null; // holds last walk frame to keep facing direction when stopped
+  private BufferedImage lastWalkFrame = null; // holds last walk frame to keep facing direction when
+                                              // stopped
 
   // constructor for player, sets initial position, stats, and idle animation
   public Player(GamePanel gamePanel, KeyHandler keyH) {
@@ -60,8 +61,8 @@ public class Player extends Entity {
   // Method to trigger posisition atttack animation Right or Left
   public void triggerAttackAnimation(Entity target) {
     boolean attackLeft = (target.x < x) || (target.x == x && facingLeft);
-    PlayerAnimationState attackState = attackLeft ? PlayerAnimationState.ATTACK_LEFT
-        : PlayerAnimationState.ATTACK_RIGHT;
+    PlayerAnimationState attackState =
+        attackLeft ? PlayerAnimationState.ATTACK_LEFT : PlayerAnimationState.ATTACK_RIGHT;
     transitionTo(attackState);
     attackAnimationPending = true;
   }
@@ -89,8 +90,7 @@ public class Player extends Entity {
 
   // Method to handle walk animation transitions to Walk, Attack etc
   private void transitionTo(PlayerAnimationState newState) {
-    if (newState == currentState)
-      return;
+    if (newState == currentState) return;
     currentState = newState;
     currentAnimation = spriteManager.getAnimation(newState);
     currentAnimation.reset();
@@ -102,14 +102,10 @@ public class Player extends Entity {
   @Override
   public void update() {
     if (isMoving) {
-      if (x < targetX)
-        x += speed;
-      if (x > targetX)
-        x -= speed;
-      if (y < targetY)
-        y += speed;
-      if (y > targetY)
-        y -= speed;
+      if (x < targetX) x += speed;
+      if (x > targetX) x -= speed;
+      if (y < targetY) y += speed;
+      if (y > targetY) y -= speed;
 
       // Snap to target when close enough to prevent jitter
       if (Math.abs(x - targetX) < speed && Math.abs(y - targetY) < speed) {
@@ -130,7 +126,7 @@ public class Player extends Entity {
       currentAnimation.update();
       if (currentAnimation.isFinished()) {
         attackAnimationPending = false;
-        // Return to last walk frame if moved 
+        // Return to last walk frame if moved
         if (hasMovedOnce && lastWalkFrame != null) {
           transitionTo(PlayerAnimationState.IDLE);
         } else {
@@ -174,7 +170,8 @@ public class Player extends Entity {
       int drawY = y;
       int size = gamePanel.tileSize;
 
-      g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+      g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+          RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
 
       g2.drawImage(frame, drawX, drawY, size, size, null);
     } else {
@@ -193,14 +190,14 @@ public class Player extends Entity {
     int fromIndex = (x / gamePanel.tileSize) + (y / gamePanel.tileSize) * gamePanel.maxScreenCol;
     int toIndex = col + row * gamePanel.maxScreenCol;
 
-    if (fromIndex == toIndex)
-      return;
+    if (fromIndex == toIndex) return;
 
     // reset action
     currentPath = null;
     targetEnemy = null;
 
-    Entity clickedEntity = gamePanel.getEntityAt(col * gamePanel.tileSize, row * gamePanel.tileSize);
+    Entity clickedEntity =
+        gamePanel.getEntityAt(col * gamePanel.tileSize, row * gamePanel.tileSize);
 
     if (clickedEntity instanceof Enemy) {
       targetEnemy = clickedEntity;
@@ -216,9 +213,9 @@ public class Player extends Entity {
     Arrays.fill(passable, true);
     for (Entity e : gamePanel.entities) {
       if (!e.isDead && e != this) {
-        int index = (e.x / gamePanel.tileSize) + (e.y / gamePanel.tileSize) * gamePanel.maxScreenCol;
-        if (index >= 0 && index < passable.length)
-          passable[index] = false;
+        int index =
+            (e.x / gamePanel.tileSize) + (e.y / gamePanel.tileSize) * gamePanel.maxScreenCol;
+        if (index >= 0 && index < passable.length) passable[index] = false;
       }
     }
     return passable;
@@ -240,20 +237,14 @@ public class Player extends Entity {
         int nextX = x;
         int nextY = y;
 
-        if (keyH.wasUpPressed)
-          nextY -= gamePanel.tileSize;
-        if (keyH.wasDownPressed)
-          nextY += gamePanel.tileSize;
-        if (keyH.wasLeftPressed)
-          nextX -= gamePanel.tileSize;
-        if (keyH.wasRightPressed)
-          nextX += gamePanel.tileSize;
+        if (keyH.wasUpPressed) nextY -= gamePanel.tileSize;
+        if (keyH.wasDownPressed) nextY += gamePanel.tileSize;
+        if (keyH.wasLeftPressed) nextX -= gamePanel.tileSize;
+        if (keyH.wasRightPressed) nextX += gamePanel.tileSize;
 
         // cancel kalo pencet arahnya bertubrukan
-        if (keyH.wasUpPressed && keyH.wasDownPressed)
-          nextY = y;
-        if (keyH.wasLeftPressed && keyH.wasRightPressed)
-          nextX = x;
+        if (keyH.wasUpPressed && keyH.wasDownPressed) nextY = y;
+        if (keyH.wasLeftPressed && keyH.wasRightPressed) nextX = x;
 
         // initiative start only if player changed position
         if (nextX != x || nextY != y) {
@@ -314,7 +305,8 @@ public class Player extends Entity {
           passable[targetIndex] = true;
         }
 
-        int fromIndex = (x / gamePanel.tileSize) + (y / gamePanel.tileSize) * gamePanel.maxScreenCol;
+        int fromIndex =
+            (x / gamePanel.tileSize) + (y / gamePanel.tileSize) * gamePanel.maxScreenCol;
         PathFinder.setMapSize(gamePanel.maxScreenCol, gamePanel.maxScreenRow);
         int nextIndex = PathFinder.getStep(fromIndex, targetIndex, passable);
 

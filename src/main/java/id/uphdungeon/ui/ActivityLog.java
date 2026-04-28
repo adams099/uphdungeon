@@ -37,10 +37,8 @@ public class ActivityLog {
 
   public void handleMouseMove(int mouseX, int mouseY, int screenHeight) {
     int logPosY = screenHeight - logHeight - 10;
-    isHovered = (mouseX >= logPosX &&
-      mouseX <= logPosX + logWidth &&
-      mouseY >= logPosY &&
-      mouseY <= logPosY + logHeight);
+    isHovered = (mouseX >= logPosX && mouseX <= logPosX + logWidth && mouseY >= logPosY
+        && mouseY <= logPosY + logHeight);
   }
 
   public void handleMouseWheel(int rotation) {
@@ -79,8 +77,7 @@ public class ActivityLog {
 
       // scrollStatus == 0 paling bawah
       // scrollStatus == maxScroll paling atas
-      int scrollBarPosY =
-        logPosY + (int) ((1.0 - scrollRatio) * (logHeight - scrollBarHeight));
+      int scrollBarPosY = logPosY + (int) ((1.0 - scrollRatio) * (logHeight - scrollBarHeight));
 
       // render scroll railing
       g2.setColor(new Color(255, 255, 255, 20));

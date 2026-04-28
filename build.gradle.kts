@@ -1,6 +1,7 @@
 plugins {
     java
     application
+    id("com.diffplug.spotless") version "8.4.0"
 }
 
 group = "id.uphdungeon"
@@ -22,4 +23,14 @@ application {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+spotless {
+    java {
+        eclipse().configFile("eclipse-format.xml")
+    }
+    kotlinGradle {
+        target("*.gradle.kts")
+        ktlint()
+    }
 }
