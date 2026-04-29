@@ -104,7 +104,6 @@ public abstract class Entity {
     g2.fillRect(barX, barY, hpWidth, barHeight);
   }
 
-  // Grid conversion helpers
   protected int getGridIndex(int x, int y) {
     return (x / gamePanel.tileSize) + (y / gamePanel.tileSize) * gamePanel.maxScreenCol;
   }

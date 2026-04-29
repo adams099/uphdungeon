@@ -46,9 +46,9 @@ public abstract class Enemy extends Entity {
     }
 
     if (currentPath != null && !currentPath.isEmpty()) {
-      int nextIdx = currentPath.peek();
-      int nextX = getXFromIndex(nextIdx);
-      int nextY = getYFromIndex(nextIdx);
+      int nextIndex = currentPath.peek();
+      int nextX = getXFromIndex(nextIndex);
+      int nextY = getYFromIndex(nextIndex);
       if (gamePanel.getEntityAt(nextX, nextY) == null) {
         setMoveIntent(nextX, nextY);
         currentPath.poll();
@@ -60,25 +60,25 @@ public abstract class Enemy extends Entity {
   }
 
   protected void chasePlayer() {
-    Player p = gamePanel.getPlayer();
-    if (p.isDead) {
+    Player player = gamePanel.getPlayer();
+    if (player.isDead) {
       wander();
       return;
     }
 
     boolean[] passable = getPassableMap();
-    int targetIdx = getGridIndex(p.x, p.y);
-    if (targetIdx >= 0 && targetIdx < passable.length) passable[targetIdx] = true;
+    int targetIndex = getGridIndex(player.x, player.y);
+    if (targetIndex >= 0 && targetIndex < passable.length) passable[targetIndex] = true;
 
     PathFinder.setMapSize(gamePanel.maxScreenCol, gamePanel.maxScreenRow);
-    int nextIdx = PathFinder.getStep(getGridIndex(x, y), targetIdx, passable);
+    int nextIndex = PathFinder.getStep(getGridIndex(x, y), targetIndex, passable);
 
-    if (nextIdx != -1) {
-      int nextX = getXFromIndex(nextIdx);
-      int nextY = getYFromIndex(nextIdx);
+    if (nextIndex != -1) {
+      int nextX = getXFromIndex(nextIndex);
+      int nextY = getYFromIndex(nextIndex);
       Entity blockingEntity = gamePanel.getEntityAt(nextX, nextY);
-      if (blockingEntity == p) {
-        setAttackIntent(p);
+      if (blockingEntity == player) {
+        setAttackIntent(player);
         return;
       }
       if (blockingEntity == null) {
@@ -111,10 +111,10 @@ public abstract class Enemy extends Entity {
       return;
     }
 
-    Player p = gamePanel.getPlayer();
-    if (!p.isDead) {
-      if (isAdjacentTo(p)) {
-        setAttackIntent(p);
+    Player player = gamePanel.getPlayer();
+    if (!player.isDead) {
+      if (isAdjacentTo(player)) {
+        setAttackIntent(player);
         return;
       }
       if (isPlayerInAggroRange(aggroRange)) {
