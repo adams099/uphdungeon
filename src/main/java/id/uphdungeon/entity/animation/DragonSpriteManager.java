@@ -77,10 +77,10 @@ public class DragonSpriteManager implements EnemySpriteManager {
         new Animation(frames("B1.png", "B2.png"), WALK_FRAME_DURATION, true));
 
     animations.put(DragonAnimationState.ATTACK_RIGHT,
-        new Animation(frames("AR1.png", "AR2.png"), ATTACK_FRAME_DURATION, false));
+        new Animation(frames("AR.png", "AR.png"), ATTACK_FRAME_DURATION, false));
 
     animations.put(DragonAnimationState.ATTACK_LEFT,
-        new Animation(frames("AL1.png", "AL2.png"), ATTACK_FRAME_DURATION, false));
+        new Animation(frames("AL.png", "AL.png"), ATTACK_FRAME_DURATION, false));
 
     animations.put(DragonAnimationState.DEATH,
         new Animation(frames("D1.png", "D2.png"), DEATH_FRAME_DURATION, false));

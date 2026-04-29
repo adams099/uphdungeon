@@ -1,3 +1,4 @@
+
 package id.uphdungeon.ui;
 
 import java.awt.Color;
@@ -7,12 +8,13 @@ import java.awt.Graphics2D;
 public class RetryButton {
   private int x, y, width, height;
   private boolean isHovered = false;
-  private final String text = "RETRY";
+  private String text;
   private Font font = new Font("Arial", Font.BOLD, 24);
 
-  public RetryButton(int screenWidth, int screenHeight) {
+  public RetryButton(int screenWidth, int screenHeight, String text) {
     this.width = 100;
     this.height = 30;
+    this.text = text;
     this.x = (screenWidth / 2) - (width / 2);
     this.y = (screenHeight / 2) + 60;
   }
