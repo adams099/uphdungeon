@@ -112,7 +112,7 @@ public class PathFinder {
       for (int i = 0; i < dir.length; i++) {
         int n = step + dir[i];
         if (n >= 0 && n < size && isAdjacent(step, n)) {
-          if (n == from || (passable[n] && (distance[n] > nextDistance))) {
+          if ((n == from || passable[n]) && (distance[n] > nextDistance)) {
             // Add to queue
             queue[tail++] = n;
             distance[n] = nextDistance;
