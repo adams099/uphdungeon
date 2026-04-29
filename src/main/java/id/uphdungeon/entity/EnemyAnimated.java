@@ -32,9 +32,8 @@ public abstract class EnemyAnimated extends Enemy {
   protected BufferedImage lastWalkFrame = null;
 
   // Constructor EnemyAnimated
-  public EnemyAnimated(GamePanel gamePanel, int startX, int startY, int dirX, int dirY, Color color,
-      int maxHealth, int minDamage, int maxDamage) {
-    super(gamePanel, startX, startY, dirX, dirY, color, maxHealth, minDamage, maxDamage);
+  public EnemyAnimated(GamePanel gamePanel, int startX, int startY, Color color) {
+    super(gamePanel, startX, startY, color);
   }
 
   // Returns the sprite manager for this enemy type
@@ -92,8 +91,12 @@ public abstract class EnemyAnimated extends Enemy {
     return currentAnimation.getCurrentFrame();
   }
 
-  // Entity overrides
-  // Priority: death > attack > walk > idle hold
+  @Override
+  protected void setAttackIntent(Entity target) {
+    super.setAttackIntent(target);
+    triggerAttackAnimation(target);
+  }
+
   @Override
   public void updateAnimations() {
     super.updateAnimations(); // handles damage indicators + calls updateFading()
@@ -128,7 +131,7 @@ public abstract class EnemyAnimated extends Enemy {
   // Handles fading out after death animation finishes
   @Override
   public void updateFading() {
-    if (isDead && !deathAnimationPlaying && !currentState.isDeath()) {
+    if (isDead && !deathAnimationPlaying && (currentState == null || !currentState.isDeath())) {
       // First time entering death: start the death animation
       transitionTo(getSpriteManager().getDeathState());
       deathAnimationPlaying = true;
@@ -178,20 +181,5 @@ public abstract class EnemyAnimated extends Enemy {
     }
 
     drawIndicators(g2);
-  }
-
-  // Draws a health bar above the enemy, showing current HP proportionally
-  private void drawHealthBar(Graphics2D g2) {
-    int barWidth = gamePanel.tileSize;
-    int barHeight = 4;
-    int barX = x;
-    int barY = y - barHeight - 2;
-
-    // health bar
-    g2.setColor(Color.RED);
-    g2.fillRect(barX, barY, barWidth, barHeight);
-    g2.setColor(Color.GREEN);
-    int hpWidth = (int) (((double) health / maxHealth) * barWidth);
-    g2.fillRect(barX, barY, hpWidth, barHeight);
   }
 }

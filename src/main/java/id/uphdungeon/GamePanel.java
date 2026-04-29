@@ -137,9 +137,9 @@ public class GamePanel extends JPanel implements Runnable {
     entities.clear();
     player = new Player(this, keyHandler);
     entities.add(player);
-    entities.add(new Skeleton(this, tileSize * 5, tileSize * 5, 1, 0));
-    entities.add(new Rat(this, tileSize * 8, tileSize * 2, 0, 1));
-    entities.add(new Rat(this, tileSize * 10, tileSize * 10, -1, -1));
+    entities.add(new Skeleton(this, tileSize * 5, tileSize * 5));
+    entities.add(new Rat(this, tileSize * 8, tileSize * 2));
+    entities.add(new Rat(this, tileSize * 10, tileSize * 10));
   }
 
   public void resetGame() {

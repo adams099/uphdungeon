@@ -11,8 +11,16 @@ public class Rat extends EnemyAnimated {
   private final RatSpriteManager spriteManager = new RatSpriteManager();
 
   // Constructor for rat
-  public Rat(GamePanel gamePanel, int startX, int startY, int dirX, int dirY) {
-    super(gamePanel, startX, startY, dirX, dirY, Color.DARK_GRAY, 10, 1, 2);
+  public Rat(GamePanel gamePanel, int startX, int startY) {
+    super(gamePanel, startX, startY, Color.DARK_GRAY);
+
+    this.maxHealth = 10;
+    this.health = maxHealth;
+    this.minDamage = 1;
+    this.maxDamage = 2;
+
+    this.aggroRange = 1;
+    this.idleWaitChance = 0.1;
     initAnimation();
   }
 
@@ -25,28 +33,5 @@ public class Rat extends EnemyAnimated {
   @Override
   public int getExpReward() {
     return 10;
-  }
-
-  // Determine the intent of the rat, and trigger attack animation if player is adjacent
-  @Override
-  public void determineIntent(GamePanel gamePanel) {
-    Player player = gamePanel.getPlayer();
-
-    // Check adjacency before super runs, because super sets the intent
-    boolean isAdjacentToPlayer = false;
-    if (!player.isDead) {
-      int dx = Math.abs(x - player.x);
-      int dy = Math.abs(y - player.y);
-      isAdjacentToPlayer =
-          dx <= gamePanel.tileSize && dy <= gamePanel.tileSize && (dx != 0 || dy != 0);
-    }
-
-    super.determineIntent(gamePanel);
-
-    // If Enemy scheduled attack and player is adjacent then trigger the attack animation
-    // immediately
-    if (isAdjacentToPlayer && !isDead) {
-      triggerAttackAnimation(player);
-    }
   }
 }
