@@ -49,7 +49,7 @@ public class PlayerStatusManager {
     // setiap naik level, max health nambah 5
     player.maxHealth += 5;
     // hp jadi maximum lagi
-    player.health += player.maxHealth;
+    player.health = player.maxHealth;
 
     // kalau level berikutnya angka genap, min damage nambah 1
     if (level % 2 == 0) {
