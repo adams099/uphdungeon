@@ -9,14 +9,13 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Random;
 
 import javax.swing.JPanel;
 
 import id.uphdungeon.entity.Enemy;
 import id.uphdungeon.entity.Entity;
 import id.uphdungeon.entity.Player;
-import id.uphdungeon.entity.Rat;
-import id.uphdungeon.entity.Skeleton;
 import id.uphdungeon.potion.PotionManager;
 import id.uphdungeon.ui.ActivityLog;
 import id.uphdungeon.ui.DeathMessage;
@@ -24,6 +23,7 @@ import id.uphdungeon.ui.PlayerStatusUI;
 import id.uphdungeon.ui.RetryButton;
 import id.uphdungeon.ui.WaitButton;
 import id.uphdungeon.utils.TileManager;
+import id.uphdungeon.utils.WaveManager;
 
 public class GamePanel extends JPanel implements Runnable {
 
@@ -43,6 +43,8 @@ public class GamePanel extends JPanel implements Runnable {
   // Tile manager for dungeon background rendering
   private TileManager tile;
 
+  private WaveManager waveManager;
+
   // Potion manager — handles spawn, respawn, pickup, and animation
   private PotionManager potionManager;
 
@@ -51,6 +53,10 @@ public class GamePanel extends JPanel implements Runnable {
   private ArrayList<Entity> turnOrder = new ArrayList<>();
   private int turnIndex = 0;
   private boolean actionInProgress = false;
+
+  private int shakeIntensity = 0;
+  private int shakeDuration = 0;
+  private final Random random = new Random();
 
   private enum GameState {
     START_ROUND,
@@ -125,6 +131,8 @@ public class GamePanel extends JPanel implements Runnable {
     // Tile must be initialised before entities so the map is ready at first frame
     tile = new TileManager(this);
 
+    waveManager = new WaveManager(this);
+
     initEntities();
 
     // Initialize potion manager
@@ -137,13 +145,14 @@ public class GamePanel extends JPanel implements Runnable {
     entities.clear();
     player = new Player(this, keyHandler);
     entities.add(player);
-    entities.add(new Skeleton(this, tileSize * 5, tileSize * 5));
-    entities.add(new Rat(this, tileSize * 8, tileSize * 2));
-    entities.add(new Rat(this, tileSize * 10, tileSize * 10));
+    if (waveManager != null) {
+      waveManager.startFirstWave();
+    }
   }
 
   public void resetGame() {
     activityLog.clear();
+    waveManager = new WaveManager(this);
     initEntities();
     potionManager = new PotionManager(this);
     gameState = GameState.START_ROUND;
@@ -216,13 +225,28 @@ public class GamePanel extends JPanel implements Runnable {
     }
   }
 
+  public void triggerScreenShake() {
+    this.shakeIntensity = 10;
+    this.shakeDuration = 20;
+  }
+
   public void update() {
+    // layar goyang - request ara
+    if (shakeDuration > 0) {
+      shakeDuration--;
+      if (shakeDuration == 0) {
+        shakeIntensity = 0;
+      }
+    }
+
     for (Entity e : entities) {
       e.updateAnimations();
     }
 
     // Update potion animation every frame
     potionManager.update();
+
+    waveManager.update();
 
     if (actionInProgress) {
       // biar animasi semua Entity tetep jalan walau ga ada initiative
@@ -305,6 +329,8 @@ public class GamePanel extends JPanel implements Runnable {
     // Tick potion respawn counter once per completed initiative turn
     potionManager.tickRespawn();
 
+    waveManager.tickCountdown();
+
     if (currentEntity instanceof Player) {
       gameState = GameState.PLAYER_TURN;
     } else {
@@ -317,22 +343,17 @@ public class GamePanel extends JPanel implements Runnable {
     super.paintComponent(g);
     Graphics2D g2 = (Graphics2D) g;
 
-    // 1. Draw dungeon floor tiles as the background
+    // layar goyang - request ara
+    if (shakeIntensity > 0) {
+      int offsetX = random.nextInt(shakeIntensity * 2 + 1) - shakeIntensity;
+      int offsetY = random.nextInt(shakeIntensity * 2 + 1) - shakeIntensity;
+      g2.translate(offsetX, offsetY);
+    }
+
     tile.draw(g2);
 
-    // 2. Draw grid lines on top of tiles for visual reference
-    // g2.setColor(Color.DARK_GRAY);
-    // for (int i = 0; i < maxScreenCol; i++) {
-    // g2.drawLine(i * tileSize, 0, i * tileSize, screenHeight);
-    // }
-    // for (int i = 0; i < maxScreenRow; i++) {
-    // g2.drawLine(0, i * tileSize, screenWidth, i * tileSize);
-    // }
-
-    // 3. Draw potion between floor and entities so it appears under Player/Enemy
     potionManager.draw(g2);
 
-    // 4. Draw all entities on top of the floor
     for (Entity e : entities) {
       e.draw(g2);
     }
