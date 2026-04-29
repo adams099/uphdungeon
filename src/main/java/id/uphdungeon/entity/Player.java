@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
 
 import id.uphdungeon.GamePanel;
 import id.uphdungeon.KeyHandler;
@@ -17,9 +16,6 @@ import id.uphdungeon.utils.PathFinder;
 public class Player extends Entity {
   KeyHandler keyH;
 
-  public boolean isMoving = false;
-  public int targetX, targetY;
-  private Runnable intent = null;
   private PathFinder.Path currentPath = null;
   private Entity targetEnemy = null;
 
@@ -103,26 +99,6 @@ public class Player extends Entity {
     currentAnimation.reset();
   }
 
-  // Entity override
-  // Called every frame by GamePanel.update() for update position
-  // base on current path or target
-  @Override
-  public void update() {
-    if (isMoving) {
-      if (x < targetX) x += speed;
-      if (x > targetX) x -= speed;
-      if (y < targetY) y += speed;
-      if (y > targetY) y -= speed;
-
-      // Snap to target when close enough to prevent jitter
-      if (Math.abs(x - targetX) < speed && Math.abs(y - targetY) < speed) {
-        x = targetX;
-        y = targetY;
-        isMoving = false;
-      }
-    }
-  }
-
   // Method update animation handles attack animation priority and walk direction
   @Override
   public void updateAnimations() {
@@ -194,7 +170,7 @@ public class Player extends Entity {
   }
 
   public void setPath(int col, int row) {
-    int fromIndex = (x / gamePanel.tileSize) + (y / gamePanel.tileSize) * gamePanel.maxScreenCol;
+    int fromIndex = getGridIndex(x, y);
     int toIndex = col + row * gamePanel.maxScreenCol;
 
     if (fromIndex == toIndex) return;
@@ -209,23 +185,11 @@ public class Player extends Entity {
     if (clickedEntity instanceof Enemy) {
       targetEnemy = clickedEntity;
     } else {
-      boolean[] passable = getPassableMap();
+      boolean[] passable = PathFinder.buildPassableMap(gamePanel.maxScreenCol,
+          gamePanel.maxScreenRow, gamePanel.tileSize, gamePanel.entities, this);
       PathFinder.setMapSize(gamePanel.maxScreenCol, gamePanel.maxScreenRow);
       currentPath = PathFinder.find(fromIndex, toIndex, passable);
     }
-  }
-
-  private boolean[] getPassableMap() {
-    boolean[] passable = new boolean[gamePanel.maxScreenCol * gamePanel.maxScreenRow];
-    Arrays.fill(passable, true);
-    for (Entity e : gamePanel.entities) {
-      if (!e.isDead && e != this) {
-        int index =
-            (e.x / gamePanel.tileSize) + (e.y / gamePanel.tileSize) * gamePanel.maxScreenCol;
-        if (index >= 0 && index < passable.length) passable[index] = false;
-      }
-    }
-    return passable;
   }
 
   @Override
@@ -308,23 +272,22 @@ public class Player extends Entity {
         targetEnemy = null;
       } else {
         // not adjacent, one step to enemy
-        boolean[] passable = getPassableMap();
+        boolean[] passable = PathFinder.buildPassableMap(gamePanel.maxScreenCol,
+            gamePanel.maxScreenRow, gamePanel.tileSize, gamePanel.entities, this);
         // temporarily make target tile passable
         // so we can move there
-        int targetIndex = (targetEnemy.x / gamePanel.tileSize)
-            + (targetEnemy.y / gamePanel.tileSize) * gamePanel.maxScreenCol;
+        int targetIndex = getGridIndex(targetEnemy.x, targetEnemy.y);
         if (targetIndex >= 0 && targetIndex < passable.length) {
           passable[targetIndex] = true;
         }
 
-        int fromIndex =
-            (x / gamePanel.tileSize) + (y / gamePanel.tileSize) * gamePanel.maxScreenCol;
+        int fromIndex = getGridIndex(x, y);
         PathFinder.setMapSize(gamePanel.maxScreenCol, gamePanel.maxScreenRow);
         int nextIndex = PathFinder.getStep(fromIndex, targetIndex, passable);
 
         if (nextIndex != -1) {
-          int nextX = (nextIndex % gamePanel.maxScreenCol) * gamePanel.tileSize;
-          int nextY = (nextIndex / gamePanel.maxScreenCol) * gamePanel.tileSize;
+          int nextX = getXFromIndex(nextIndex);
+          int nextY = getYFromIndex(nextIndex);
 
           Entity blocking = gamePanel.getEntityAt(nextX, nextY);
           if (blocking != null && blocking != targetEnemy) {
@@ -353,8 +316,8 @@ public class Player extends Entity {
 
     } else if (currentPath != null && !currentPath.isEmpty()) {
       int nextIndex = currentPath.peek();
-      int nextX = (nextIndex % gamePanel.maxScreenCol) * gamePanel.tileSize;
-      int nextY = (nextIndex / gamePanel.maxScreenCol) * gamePanel.tileSize;
+      int nextX = getXFromIndex(nextIndex);
+      int nextY = getYFromIndex(nextIndex);
 
       Entity targetEntity = gamePanel.getEntityAt(nextX, nextY);
       if (targetEntity instanceof Enemy) {
@@ -388,14 +351,6 @@ public class Player extends Entity {
     }
   }
 
-  @Override
-  public void executeAction(GamePanel gamePanel) {
-    if (intent != null) {
-      intent.run();
-      intent = null;
-    }
-  }
-
   public boolean hasIntent() {
     return intent != null;
   }
@@ -417,20 +372,6 @@ public class Player extends Entity {
 
     // Before first move, show spawn default
     return currentAnimation.getCurrentFrame();
-  }
-
-  private void drawHealthBar(Graphics2D g2) {
-    int barWidth = gamePanel.tileSize;
-    int barHeight = 4;
-    int barX = x;
-    int barY = y - barHeight - 2;
-
-    // health bar
-    g2.setColor(Color.RED);
-    g2.fillRect(barX, barY, barWidth, barHeight);
-    g2.setColor(Color.GREEN);
-    int hpWidth = (int) (((double) health / maxHealth) * barWidth);
-    g2.fillRect(barX, barY, hpWidth, barHeight);
   }
 
 }

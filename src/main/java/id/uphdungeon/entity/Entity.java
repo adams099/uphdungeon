@@ -11,6 +11,10 @@ import java.util.Random;
 public abstract class Entity {
   protected GamePanel gamePanel;
   public int x, y;
+  public int targetX, targetY;
+  public boolean isMoving = false;
+  protected Runnable intent = null;
+
   // kecepatan animasi
   public int speed = 10;
   public int initiative;
@@ -31,9 +35,28 @@ public abstract class Entity {
 
   public abstract void determineIntent(GamePanel gamePanel);
 
-  public abstract void executeAction(GamePanel gamePanel);
+  public void executeAction(GamePanel gamePanel) {
+    if (intent != null) {
+      intent.run();
+      intent = null;
+    }
+  }
 
-  public abstract void update();
+  public void update() {
+    if (isMoving && !isDead) {
+      if (x < targetX) x += speed;
+      if (x > targetX) x -= speed;
+      if (y < targetY) y += speed;
+      if (y > targetY) y -= speed;
+
+      // Snap to target if very close to prevent jitter
+      if (Math.abs(x - targetX) < speed && Math.abs(y - targetY) < speed) {
+        x = targetX;
+        y = targetY;
+        isMoving = false;
+      }
+    }
+  }
 
   public abstract void draw(Graphics2D g2);
 
@@ -47,7 +70,15 @@ public abstract class Entity {
     }
   }
 
-  public void updateFading() {}
+  public void updateFading() {
+    if (isFading) {
+      alpha -= 0.02f;
+      if (alpha < 0) {
+        alpha = 0;
+        isFading = false;
+      }
+    }
+  }
 
   public void updateAnimations() {
     updateIndicators();
@@ -58,6 +89,32 @@ public abstract class Entity {
     for (DamageIndicator di : damageIndicators) {
       di.draw(g2);
     }
+  }
+
+  protected void drawHealthBar(Graphics2D g2) {
+    int barWidth = gamePanel.tileSize;
+    int barHeight = 4;
+    int barX = x;
+    int barY = y - barHeight - 2;
+
+    g2.setColor(Color.RED);
+    g2.fillRect(barX, barY, barWidth, barHeight);
+    g2.setColor(Color.GREEN);
+    int hpWidth = (int) (((double) health / maxHealth) * barWidth);
+    g2.fillRect(barX, barY, hpWidth, barHeight);
+  }
+
+  // Grid conversion helpers
+  protected int getGridIndex(int x, int y) {
+    return (x / gamePanel.tileSize) + (y / gamePanel.tileSize) * gamePanel.maxScreenCol;
+  }
+
+  protected int getXFromIndex(int index) {
+    return (index % gamePanel.maxScreenCol) * gamePanel.tileSize;
+  }
+
+  protected int getYFromIndex(int index) {
+    return (index / gamePanel.maxScreenCol) * gamePanel.tileSize;
   }
 
   public void attack(Entity target) {

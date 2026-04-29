@@ -24,8 +24,10 @@
 
 package id.uphdungeon.utils;
 
+import id.uphdungeon.entity.Entity;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 
 public class PathFinder {
   public static int[] distance;
@@ -144,6 +146,29 @@ public class PathFinder {
     }
 
     return best == from ? -1 : best;
+  }
+
+  public static int getIndex(int x, int y, int tileSize, int width) {
+    return (x / tileSize) + (y / tileSize) * width;
+  }
+
+  public static boolean[] buildPassableMap(int width, int height, int tileSize,
+      List<? extends Entity> entities, Entity exclude) {
+    boolean[] passable = new boolean[width * height];
+    Arrays.fill(passable, true);
+    for (Entity e : entities) {
+      if (!e.isDead && e != exclude) {
+        int index = getIndex(e.x, e.y, tileSize, width);
+        if (index >= 0 && index < passable.length) passable[index] = false;
+      }
+    }
+    return passable;
+  }
+
+  public static int getGridDistance(int x1, int y1, int x2, int y2, int tileSize) {
+    int dx = Math.abs(x1 - x2) / tileSize;
+    int dy = Math.abs(y1 - y2) / tileSize;
+    return Math.max(dx, dy);
   }
 
   public static class Path extends LinkedList<Integer> {
