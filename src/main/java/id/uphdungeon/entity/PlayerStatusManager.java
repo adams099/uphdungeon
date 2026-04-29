@@ -46,8 +46,8 @@ public class PlayerStatusManager {
     level++;
     experience = 0;
 
-    // setiap naik level, max health nambah 5
-    player.maxHealth += 5;
+    // setiap naik level, max health nambah 10
+    player.maxHealth += 10;
     // hp jadi maximum lagi
     player.health = player.maxHealth;
 
@@ -55,7 +55,8 @@ public class PlayerStatusManager {
     if (level % 2 == 0) {
       player.minDamage += 1;
     } else {
-      // kalau level berikutnya angka gajnil, max damage nambah 1
+      // kalau level berikutnya angka gajnil, min & max damage nambah 1
+      player.minDamage += 1;
       player.maxDamage += 1;
     }
 
