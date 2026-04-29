@@ -18,7 +18,7 @@ import id.uphdungeon.entity.Entity;
 import id.uphdungeon.entity.Player;
 import id.uphdungeon.potion.PotionManager;
 import id.uphdungeon.ui.ActivityLog;
-import id.uphdungeon.ui.DeathMessage;
+import id.uphdungeon.ui.EndMessage;
 import id.uphdungeon.ui.PlayerStatusUI;
 import id.uphdungeon.ui.RetryButton;
 import id.uphdungeon.ui.WaitButton;
@@ -37,14 +37,14 @@ public class GamePanel extends JPanel implements Runnable {
   public final int screenHeight = tileSize * maxScreenRow;
   public final int FPS = 60;
 
+  public boolean gameWon = false;
+
   public KeyHandler keyHandler = new KeyHandler();
   private Thread gameThread;
 
   // Tile manager for dungeon background rendering
   private TileManager tile;
-
   private WaveManager waveManager;
-
   // Potion manager — handles spawn, respawn, pickup, and animation
   private PotionManager potionManager;
 
@@ -68,8 +68,10 @@ public class GamePanel extends JPanel implements Runnable {
   private GameState gameState = GameState.START_ROUND;
 
   private final ActivityLog activityLog = new ActivityLog();
-  private final DeathMessage deathMessage = new DeathMessage();
+  private final EndMessage deathMessage = new EndMessage(EndMessage.MessageType.DEATH);
+  private final EndMessage winMessage = new EndMessage(EndMessage.MessageType.WIN);
   private final WaitButton waitButton;
+  private final RetryButton playAgainButton;
   private final RetryButton retryButton;
   private final PlayerStatusUI playerStatusUI;
 
@@ -79,7 +81,8 @@ public class GamePanel extends JPanel implements Runnable {
     this.setDoubleBuffered(true);
 
     this.waitButton = new WaitButton(screenWidth, screenHeight);
-    this.retryButton = new RetryButton(screenWidth, screenHeight);
+    this.playAgainButton = new RetryButton(screenWidth, screenHeight, "Play Again");
+    this.retryButton = new RetryButton(screenWidth, screenHeight, "Retry");
     this.playerStatusUI = new PlayerStatusUI(this);
 
     // allows the panel to receive key inputs
@@ -92,8 +95,11 @@ public class GamePanel extends JPanel implements Runnable {
         activityLog.handleMouseMove(e.getX(), e.getY(), screenHeight);
         playerStatusUI.updateMousePosition(e.getX(), e.getY());
         waitButton.update(e.getX(), e.getY());
-        if (player != null && player.isDead) {
+        if ((player != null && player.isDead)) {
           retryButton.update(e.getX(), e.getY());
+        }
+        if (gameWon) {
+          playAgainButton.update(e.getX(), e.getY());
         }
       }
 
@@ -114,6 +120,13 @@ public class GamePanel extends JPanel implements Runnable {
       public void mousePressed(MouseEvent e) {
         if (player != null && player.isDead) {
           if (retryButton.isClicked(e.getX(), e.getY())) {
+            resetGame();
+            return;
+          }
+        }
+
+        if (gameWon) {
+          if (playAgainButton.isClicked(e.getX(), e.getY())) {
             resetGame();
             return;
           }
@@ -157,6 +170,7 @@ public class GamePanel extends JPanel implements Runnable {
     potionManager = new PotionManager(this);
     gameState = GameState.START_ROUND;
     actionInProgress = false;
+    gameWon = false;
     turnIndex = 0;
     turnOrder.clear();
     addLogMessage("Game Restarted!", Color.YELLOW);
@@ -351,7 +365,6 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     tile.draw(g2);
-
     potionManager.draw(g2);
 
     for (Entity e : entities) {
@@ -365,6 +378,11 @@ public class GamePanel extends JPanel implements Runnable {
     if (player.isDead) {
       deathMessage.draw(g2, screenWidth, screenHeight);
       retryButton.draw(g2);
+    }
+
+    if (gameWon) {
+      winMessage.draw(g2, screenWidth, screenHeight);
+      playAgainButton.draw(g2);
     }
 
     g2.dispose();

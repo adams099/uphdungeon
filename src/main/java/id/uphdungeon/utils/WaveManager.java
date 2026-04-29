@@ -68,7 +68,9 @@ public class WaveManager {
         gamePanel.addLogMessage("All enemies defeated!", Color.YELLOW);
         gamePanel.addLogMessage("Next wave in " + countdown + " initiatives...", Color.YELLOW);
       } else {
-        gamePanel.addLogMessage("Dungeon Cleared!", Color.GREEN);
+        gamePanel.addLogMessage("Boss slain!", Color.GREEN);
+        gamePanel.addLogMessage("You've proven yourself worthy!", Color.GREEN);
+        gamePanel.gameWon = true;
       }
     }
   }

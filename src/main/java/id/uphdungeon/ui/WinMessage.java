@@ -4,14 +4,14 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 
-public class DeathMessage {
+public class WinMessage {
   public void draw(Graphics2D g2, int screenWidth, int screenHeight) {
-    g2.setColor(Color.RED);
+    g2.setColor(new Color(255, 215, 0)); // gold color
     g2.setFont(new Font("Arial", Font.BOLD, 48));
-    String deathMessage = "YOU DIED";
-    int stringWidth = g2.getFontMetrics().stringWidth(deathMessage);
+    String winMessage = "YOU WIN";
+    int stringWidth = g2.getFontMetrics().stringWidth(winMessage);
     int stringHeight = g2.getFontMetrics().getHeight();
-    g2.drawString(deathMessage, (screenWidth / 2) - (stringWidth / 2),
+    g2.drawString(winMessage, (screenWidth / 2) - (stringWidth / 2),
         (screenHeight / 2) + (stringHeight / 4));
   }
 }
