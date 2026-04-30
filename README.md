@@ -1,5 +1,15 @@
 # UPH Dungeon
 
+This game was made as a requirement for end-semester exam for Java Programming 1812 and Lab 1814 in Universitas Pelita Harapan (UPH).
+
+The main inspiration is game [Pixel Dungeon](https://github.com/watabou/pixel-dungeon/) and [Shattered Pixel Dungeon](https://shatteredpixel.com/).
+Some game design differences were made to accommodate time limitation of the project creation.
+
+Special mention for the modified code in [PathFinder.java](https://github.com/ybbond/uphdungeon/blob/main/src/main/java/id/uphdungeon/utils/PathFinder.java)
+that we copy and modified from [watabou/PD-classes ~ PathFinder.java](https://github.com/watabou/PD-classes/blob/master/com/watabou/utils/PathFinder.java).
+
+The code we copy and modified uses GNUv3 License, and as such we also implement the same License.
+
 ## Collaborators
 
 - **Adam Musyafa Adipratama** [@adams099](https://github.com/adams099) (01085250004)
