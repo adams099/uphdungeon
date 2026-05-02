@@ -11,7 +11,7 @@ import java.util.Random;
 // Manages the single active potion in the dungeon
 public class PotionManager {
   // Spawn chance for Greater Potion 12/100
-  private static final int GREATER_POTION_CHANCE = 12;
+  private static final int GREATER_POTION_CHANCE = 24;
 
   private final GamePanel gamePanel;
   private final Random random = new Random();
