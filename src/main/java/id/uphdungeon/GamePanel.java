@@ -163,7 +163,7 @@ public class GamePanel extends JPanel implements Runnable {
     }
   }
 
-  public void resetGame() {
+  public synchronized void resetGame() {
     activityLog.clear();
     waveManager = new WaveManager(this);
     initEntities();
@@ -244,7 +244,7 @@ public class GamePanel extends JPanel implements Runnable {
     this.shakeDuration = 20;
   }
 
-  public void update() {
+  public synchronized void update() {
     // layar goyang - request ara
     if (shakeDuration > 0) {
       shakeDuration--;
@@ -357,32 +357,34 @@ public class GamePanel extends JPanel implements Runnable {
     super.paintComponent(g);
     Graphics2D g2 = (Graphics2D) g;
 
-    // layar goyang - request ara
-    if (shakeIntensity > 0) {
-      int offsetX = random.nextInt(shakeIntensity * 2 + 1) - shakeIntensity;
-      int offsetY = random.nextInt(shakeIntensity * 2 + 1) - shakeIntensity;
-      g2.translate(offsetX, offsetY);
-    }
+    synchronized (this) {
+      // layar goyang - request ara
+      if (shakeIntensity > 0) {
+        int offsetX = random.nextInt(shakeIntensity * 2 + 1) - shakeIntensity;
+        int offsetY = random.nextInt(shakeIntensity * 2 + 1) - shakeIntensity;
+        g2.translate(offsetX, offsetY);
+      }
 
-    tile.draw(g2);
-    potionManager.draw(g2);
+      tile.draw(g2);
+      potionManager.draw(g2);
 
-    for (Entity e : entities) {
-      e.draw(g2);
-    }
+      for (Entity e : entities) {
+        e.draw(g2);
+      }
 
-    playerStatusUI.draw(g2);
-    waitButton.draw(g2);
-    activityLog.draw(g2, screenHeight);
+      playerStatusUI.draw(g2);
+      waitButton.draw(g2);
+      activityLog.draw(g2, screenHeight);
 
-    if (player.isDead) {
-      deathMessage.draw(g2, screenWidth, screenHeight);
-      retryButton.draw(g2);
-    }
+      if (player.isDead) {
+        deathMessage.draw(g2, screenWidth, screenHeight);
+        retryButton.draw(g2);
+      }
 
-    if (gameWon) {
-      winMessage.draw(g2, screenWidth, screenHeight);
-      playAgainButton.draw(g2);
+      if (gameWon) {
+        winMessage.draw(g2, screenWidth, screenHeight);
+        playAgainButton.draw(g2);
+      }
     }
 
     g2.dispose();
